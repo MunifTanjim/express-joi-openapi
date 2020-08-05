@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`initializeJoiOpenApi basic request schema generation 1`] = `
+Object {
+  "/ping": Object {
+    "post": Object {
+      "parameters": Array [
+        Object {
+          "in": "query",
+          "name": "count",
+          "required": true,
+          "schema": Object {
+            "description": "number of times ping will pong",
+            "title": "pong count",
+            "type": "integer",
+          },
+        },
+      ],
+      "requestBody": Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "type": Object {
+                  "default": "rubber",
+                  "enum": Array [
+                    "plastic",
+                    "rubber",
+                    "wood",
+                  ],
+                  "type": "string",
+                },
+              },
+              "type": "object",
+            },
+          },
+        },
+      },
+      "responses": Object {
+        "default": Object {
+          "description": "",
+        },
+      },
+    },
+  },
+}
+`;
