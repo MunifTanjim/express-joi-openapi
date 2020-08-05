@@ -19,7 +19,6 @@
   "source": "src/index.ts",
   "main": "lib/index.js",
   "module": "lib/index.module.js",
-  "unpkg": "lib/index.umd.js",
   "types": "lib/index.d.ts",
   "repository": {
     "type": "git",
@@ -27,11 +26,11 @@
   },
   "scripts": {
     "prebuild": "rimraf lib/*",
-    "build": "microbundle",
+    "build": "microbundle --format cjs,es --target node",
     "changelog": "conventional-changelog --config .changelogrc.js -i CHANGELOG.md -s -a",
     "postchangelog": "git add CHANGELOG.md",
     "cz": "git-cz",
-    "dev": "microbundle watch",
+    "dev": "microbundle watch --format cjs,es --target node",
     "prepack": "yarn run build",
     "release": "./scripts/release.sh",
     "test": "jest",
@@ -42,6 +41,7 @@
     "ramda": "^0.27.1"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-optional-chaining": "^7.11.0",
     "@commitlint/cli": "^9.1.1",
     "@commitlint/config-conventional": "^9.1.1",
     "@commitlint/prompt-cli": "^9.1.1",
