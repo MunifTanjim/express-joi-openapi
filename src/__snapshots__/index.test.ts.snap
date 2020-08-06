@@ -1,5 +1,167 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`getRequestValidationMiddleware segmentOrder (custom) validates body before query 1`] = `
+Object {
+  "error": Object {
+    "details": Array [
+      Object {
+        "message": "\\"type\\" must be one of [plastic, rubber, wood]",
+        "path": Array [
+          "type",
+        ],
+        "type": "any.only",
+      },
+    ],
+    "message": "\\"type\\" must be one of [plastic, rubber, wood]",
+    "segment": "body",
+  },
+}
+`;
+
+exports[`getRequestValidationMiddleware segmentOrder (custom) validates body before query 2`] = `
+Object {
+  "error": Object {
+    "details": Array [
+      Object {
+        "message": "\\"count\\" is required",
+        "path": Array [
+          "count",
+        ],
+        "type": "any.required",
+      },
+    ],
+    "message": "\\"count\\" is required",
+    "segment": "query",
+  },
+}
+`;
+
+exports[`getRequestValidationMiddleware segmentOrder (default) validates query before body 1`] = `
+Object {
+  "error": Object {
+    "details": Array [
+      Object {
+        "message": "\\"count\\" is required",
+        "path": Array [
+          "count",
+        ],
+        "type": "any.required",
+      },
+    ],
+    "message": "\\"count\\" is required",
+    "segment": "query",
+  },
+}
+`;
+
+exports[`getRequestValidationMiddleware segmentOrder (default) validates query before body 2`] = `
+Object {
+  "error": Object {
+    "details": Array [
+      Object {
+        "message": "\\"type\\" must be one of [plastic, rubber, wood]",
+        "path": Array [
+          "type",
+        ],
+        "type": "any.only",
+      },
+    ],
+    "message": "\\"type\\" must be one of [plastic, rubber, wood]",
+    "segment": "body",
+  },
+}
+`;
+
+exports[`getRequestValidationMiddleware validates body 1`] = `
+Object {
+  "error": Object {
+    "details": Array [
+      Object {
+        "message": "\\"type\\" must be one of [plastic, rubber, wood]",
+        "path": Array [
+          "type",
+        ],
+        "type": "any.only",
+      },
+    ],
+    "message": "\\"type\\" must be one of [plastic, rubber, wood]",
+    "segment": "body",
+  },
+}
+`;
+
+exports[`getRequestValidationMiddleware validates headers 1`] = `
+Object {
+  "error": Object {
+    "details": Array [
+      Object {
+        "message": "\\"authorization\\" with value \\"JWT 42\\" fails to match the required pattern: /^Bearer .+$/",
+        "path": Array [
+          "authorization",
+        ],
+        "type": "string.pattern.base",
+      },
+    ],
+    "message": "\\"authorization\\" with value \\"JWT 42\\" fails to match the required pattern: /^Bearer .+$/",
+    "segment": "headers",
+  },
+}
+`;
+
+exports[`getRequestValidationMiddleware validates params 1`] = `
+Object {
+  "error": Object {
+    "details": Array [
+      Object {
+        "message": "\\"id\\" must be a number",
+        "path": Array [
+          "id",
+        ],
+        "type": "number.base",
+      },
+    ],
+    "message": "\\"id\\" must be a number",
+    "segment": "params",
+  },
+}
+`;
+
+exports[`getRequestValidationMiddleware validates query 1`] = `
+Object {
+  "error": Object {
+    "details": Array [
+      Object {
+        "message": "\\"count\\" is required",
+        "path": Array [
+          "count",
+        ],
+        "type": "any.required",
+      },
+    ],
+    "message": "\\"count\\" is required",
+    "segment": "query",
+  },
+}
+`;
+
+exports[`getRequestValidationMiddleware validates query 2`] = `
+Object {
+  "error": Object {
+    "details": Array [
+      Object {
+        "message": "\\"count\\" must be a number",
+        "path": Array [
+          "count",
+        ],
+        "type": "number.base",
+      },
+    ],
+    "message": "\\"count\\" must be a number",
+    "segment": "query",
+  },
+}
+`;
+
 exports[`initializeJoiOpenApi basic request schema generation 1`] = `
 Object {
   "/ping": Object {
