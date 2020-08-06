@@ -70,6 +70,14 @@ Object {
             },
           },
           "description": "",
+          "headers": Object {
+            "x-count": Object {
+              "required": true,
+              "schema": Object {
+                "type": "integer",
+              },
+            },
+          },
         },
         "default": Object {
           "description": "",

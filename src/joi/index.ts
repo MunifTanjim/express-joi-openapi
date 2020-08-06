@@ -112,7 +112,7 @@ export const getJoiSchemaProcessor = (
           headerObject.deprecated = schema.deprecated
         }
 
-        headersObject[name] = headersObject
+        headersObject[name] = headerObject
       }
     }
 

@@ -47,12 +47,16 @@ describe('initializeJoiOpenApi', () => {
       '/ping',
       getResponseValidationMiddleware({
         200: {
+          headers: Joi.object({
+            'x-count': Joi.number().integer().required(),
+          }).unknown(),
           body: Joi.object({
             pong: Joi.number().integer().required(),
           }),
         },
       }),
       (_req, res) => {
+        res.set('x-count', '42')
         res.status(200).json({ pong: 42 })
       }
     )
