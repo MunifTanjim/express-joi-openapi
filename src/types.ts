@@ -51,7 +51,7 @@ type JoiResponseValidationSchema = {
 export type GetResponseValidationMiddleware = (
   joiResponseSchema: JoiResponseValidationSchema,
   joiValidationOptions?: ValidationOptions,
-  options?: unknown
+  options?: { segmentOrder?: ResponseSegment[] }
 ) => Handler
 
 export type GetOpenAPISpecification = (

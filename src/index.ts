@@ -7,7 +7,7 @@ import type {
   ValidationResult,
 } from '@hapi/joi'
 import type { Handler } from 'express'
-import { RequestValidationError } from './error'
+import { RequestValidationError, ResponseValidationError } from './error'
 import { OpenAPISpecificationBuilder, processExpressRoutes } from './openapi'
 import { requestSchemaStash, responseSchemaStash } from './stash'
 import type {
@@ -19,7 +19,7 @@ import type {
   ResponseSegment,
 } from './types'
 
-const defaultSegmentOrder: RequestSegment[] = [
+const defaultRequestSegmentOrder: RequestSegment[] = [
   'body',
   'cookies',
   'headers',
@@ -27,6 +27,8 @@ const defaultSegmentOrder: RequestSegment[] = [
   'query',
   'signedCookies',
 ]
+
+const defaultResponseSegmentOrder: ResponseSegment[] = ['body', 'headers']
 
 export const initializeJoiOpenApi = ({
   Joi,
@@ -40,7 +42,7 @@ export const initializeJoiOpenApi = ({
   const getRequestValidationMiddleware: GetRequestValidationMiddleware = (
     joiRequestSchema,
     joiValidationOptions = {},
-    { segmentOrder = defaultSegmentOrder } = {}
+    { segmentOrder = defaultRequestSegmentOrder } = {}
   ) => {
     const schemaMap = new Map<RequestSegment, Schema | undefined>()
 
@@ -94,7 +96,8 @@ export const initializeJoiOpenApi = ({
 
   const getResponseValidationMiddleware: GetResponseValidationMiddleware = (
     joiResponseSchema,
-    joiValidationOptions = {}
+    joiValidationOptions = {},
+    { segmentOrder = defaultResponseSegmentOrder } = {}
   ) => {
     const schemaMap: JoiResponseSchemaMap = new Map()
 
@@ -123,8 +126,17 @@ export const initializeJoiOpenApi = ({
     ): Promise<void> => {
       const originalSend = res.send
 
-      res.send = function validateResponseAndSend(...args) {
+      res.send = function validateAndSendResponse(...args) {
         const body = args[0]
+
+        const isJsonContent = /application\/json/.test(
+          String(res.get('content-type'))
+        )
+
+        const value: { [key in ResponseSegment]: unknown } = {
+          body: isJsonContent ? JSON.parse(body) : body,
+          headers: res.getHeaders(),
+        }
 
         const schemaBySegment = schemaMap.has(String(res.statusCode))
           ? schemaMap.get(String(res.statusCode))
@@ -136,49 +148,29 @@ export const initializeJoiOpenApi = ({
           )
         }
 
-        let bodyValidationResult: ValidationResult | null = null
-        let headersValidationResult: ValidationResult | null = null
+        for (const segment of segmentOrder) {
+          const schema = schemaBySegment[segment]
 
-        if (schemaBySegment.body) {
-          bodyValidationResult = schemaBySegment.body.validate(
-            body,
+          if (!schema) {
+            continue
+          }
+
+          const validationResult = schema.validate(
+            value[segment],
             validationOptions
           )
+
+          if (validationResult.error) {
+            throw new ResponseValidationError(validationResult.error, segment)
+          }
+
+          if (segment === 'body') {
+            value[segment] = validationResult.value
+          }
         }
-
-        if (schemaBySegment.headers) {
-          const responsHeaders = res.getHeaders()
-
-          headersValidationResult = schemaBySegment.headers.validate(
-            responsHeaders,
-            validationOptions
-          )
-        }
-
-        if (!bodyValidationResult?.error && !headersValidationResult?.error) {
-          return originalSend.apply(res, args)
-        }
-
-        if (bodyValidationResult?.error) {
-          console.error(
-            `Response Body Validation Error:`,
-            bodyValidationResult.error
-          )
-        }
-
-        if (headersValidationResult?.error) {
-          console.error(
-            `Response Headers Validation Error:`,
-            headersValidationResult.error
-          )
-        }
-
-        res.status(500)
 
         return originalSend.apply(res, [
-          {
-            error: `OpenAPI Response Validation: Incorrect Response(${res.statusCode}) Schema`,
-          },
+          isJsonContent ? JSON.stringify(value.body) : value.body,
         ])
       }
 

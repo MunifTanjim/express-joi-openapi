@@ -46,3 +46,36 @@ Object {
   },
 }
 `;
+
+exports[`initializeJoiOpenApi basic response schema generation 1`] = `
+Object {
+  "/ping": Object {
+    "post": Object {
+      "responses": Object {
+        "200": Object {
+          "content": Object {
+            "application/json": Object {
+              "schema": Object {
+                "additionalProperties": false,
+                "properties": Object {
+                  "pong": Object {
+                    "type": "integer",
+                  },
+                },
+                "required": Array [
+                  "pong",
+                ],
+                "type": "object",
+              },
+            },
+          },
+          "description": "",
+        },
+        "default": Object {
+          "description": "",
+        },
+      },
+    },
+  },
+}
+`;
