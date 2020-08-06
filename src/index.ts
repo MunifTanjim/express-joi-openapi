@@ -19,6 +19,8 @@ import type {
   ResponseSegment,
 } from './types'
 
+export * from './error'
+
 const defaultRequestSegmentOrder: RequestSegment[] = [
   'headers',
   'params',
