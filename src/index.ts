@@ -20,12 +20,12 @@ import type {
 } from './types'
 
 const defaultRequestSegmentOrder: RequestSegment[] = [
-  'body',
-  'cookies',
   'headers',
   'params',
   'query',
+  'cookies',
   'signedCookies',
+  'body',
 ]
 
 const defaultResponseSegmentOrder: ResponseSegment[] = ['body', 'headers']
