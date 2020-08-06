@@ -1,6 +1,6 @@
 {
   "name": "express-joi-openapi",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Express Joi OpenAPI",
   "keywords": [],
   "homepage": "https://github.com/MunifTanjim/express-joi-openapi#readme",
