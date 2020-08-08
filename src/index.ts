@@ -1,4 +1,4 @@
-import type {
+import {
   AsyncValidationOptions,
   Root,
   Schema,
@@ -6,11 +6,11 @@ import type {
   ValidationOptions,
   ValidationResult,
 } from '@hapi/joi'
-import type { Handler } from 'express'
+import { Handler } from 'express'
 import { RequestValidationError, ResponseValidationError } from './error'
 import { OpenAPISpecification, processExpressRoutes } from './openapi'
 import { requestSchemaStash, responseSchemaStash } from './stash'
-import type {
+import {
   GetRequestValidationMiddleware,
   GetResponseValidationMiddleware,
   JoiResponseSchemaMap,

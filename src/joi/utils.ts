@@ -1,5 +1,5 @@
-import type { Schema } from '@hapi/joi'
-import type {
+import { Schema } from '@hapi/joi'
+import {
   JoiSchema,
   JoiSchemaRule,
   JoiSchemaRuleName,

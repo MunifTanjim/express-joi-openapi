@@ -1,4 +1,4 @@
-import type {
+import {
   ComponentsObject,
   ExternalDocumentationObject,
   InfoObject,
@@ -12,8 +12,8 @@ import type {
   ServerObject,
   TagObject,
 } from 'openapi3-ts'
-import type { SetRequired } from 'type-fest'
-import type { HttpMethod } from '../types'
+import { SetRequired } from 'type-fest'
+import { HttpMethod } from '../types'
 
 type ComponentType =
   | 'schemas'

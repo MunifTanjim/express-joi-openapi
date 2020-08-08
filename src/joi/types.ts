@@ -1,4 +1,4 @@
-import type {
+import {
   ArrayUniqueOptions,
   ComparatorFunction,
   EmailOptions,
@@ -180,7 +180,6 @@ export type JoiSchemaFlags = {
 }
 
 declare module '@hapi/joi' {
-  type Preferences = import('@hapi/joi').ValidationOptions
   interface SchemaInternals {
     _rules: any[]
     _singleRules: Map<string, any>
@@ -188,7 +187,7 @@ declare module '@hapi/joi' {
 
   interface AnySchema {
     $_terms: JoiSchemaTerms<'any'>
-    _preferences: null | Preferences
+    _preferences: null | import('@hapi/joi').ValidationOptions
     _valids: null | {
       _values: Set<any>
     }

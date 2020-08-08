@@ -1,5 +1,5 @@
-import type { ValidationError } from '@hapi/joi'
-import type { RequestSegment, ResponseSegment } from './types'
+import { ValidationError } from '@hapi/joi'
+import { RequestSegment, ResponseSegment } from './types'
 
 export class RequestValidationError extends Error {
   segment: RequestSegment

@@ -1,5 +1,5 @@
-import type { ParameterLocation } from 'openapi3-ts'
-import type { RequestSegment } from '../types'
+import { ParameterLocation } from 'openapi3-ts'
+import { RequestSegment } from '../types'
 
 const parameterLocationBySegment: {
   [key in Exclude<RequestSegment, 'body'>]: ParameterLocation

@@ -1,5 +1,5 @@
-import type { Handler } from 'express'
-import type { JoiRequestSchemaMap, JoiResponseSchemaMap } from './types'
+import { Handler } from 'express'
+import { JoiRequestSchemaMap, JoiResponseSchemaMap } from './types'
 
 export const requestSchemaStash = new Map<Handler, JoiRequestSchemaMap>()
 

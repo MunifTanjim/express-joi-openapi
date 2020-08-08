@@ -1,11 +1,11 @@
-import type {
+import {
   AsyncValidationOptions,
   Schema,
   SchemaLike,
   ValidationOptions,
 } from '@hapi/joi'
-import type { Application, Handler } from 'express'
-import type { OpenAPIObject } from 'openapi3-ts'
+import { Application, Handler } from 'express'
+import { OpenAPIObject } from 'openapi3-ts'
 import { OpenAPISpecification } from './openapi'
 
 export type RequestSegment =

@@ -1,11 +1,7 @@
 import { ReferenceObject } from 'openapi3-ts'
 import { requestSchemaStash, responseSchemaStash } from '../stash'
-import type {
-  HttpMethod,
-  JoiRequestSchemaMap,
-  JoiResponseSchemaMap,
-} from '../types'
-import type { Route } from './types'
+import { HttpMethod, JoiRequestSchemaMap, JoiResponseSchemaMap } from '../types'
+import { Route } from './types'
 
 export const extractSchemaMaps = (
   route: Route,

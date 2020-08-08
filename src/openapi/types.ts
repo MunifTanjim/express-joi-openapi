@@ -1,6 +1,6 @@
-import type { Router } from 'express'
-import type { Key } from 'path-to-regexp'
-import type { HttpMethod } from '../types'
+import { Router } from 'express'
+import { Key } from 'path-to-regexp'
+import { HttpMethod } from '../types'
 
 export const enum StackName {
   QUERY = 'query',

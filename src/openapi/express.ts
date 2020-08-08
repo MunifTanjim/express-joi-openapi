@@ -1,10 +1,9 @@
-import type { Application, Router } from 'express'
+import { Application, Router } from 'express'
 import { getJoiSchemaProcessor } from '../joi'
-import type { HttpMethod } from '../types'
+import { HttpMethod } from '../types'
 import { getParameterLocation } from '../utils'
-import type { OpenAPISpecification } from './index'
-import { StackName } from './types'
-import type { Layer, Route, StackLayer } from './types'
+import { OpenAPISpecification } from './index'
+import { Layer, Route, StackLayer, StackName } from './types'
 import { extractSchemaMaps } from './utils'
 
 const regexPattern = {

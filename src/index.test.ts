@@ -1,9 +1,8 @@
 import Joi from '@hapi/joi'
-import express from 'express'
-import type { Application, ErrorRequestHandler, Handler } from 'express'
+import express, { Application, ErrorRequestHandler, Handler } from 'express'
 import request from 'supertest'
 import { initializeJoiOpenApi, RequestValidationError } from './index'
-import type { GetRequestValidationMiddleware } from './types'
+import { GetRequestValidationMiddleware } from './types'
 
 describe('initializeJoiOpenApi', () => {
   test('basic request schema generation', () => {

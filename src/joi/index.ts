@@ -1,5 +1,5 @@
-import type { Schema } from '@hapi/joi'
-import type {
+import { Schema } from '@hapi/joi'
+import {
   HeaderObject,
   HeadersObject,
   ParameterLocation,
@@ -7,8 +7,8 @@ import type {
   RequestBodyObject,
   ResponseObject,
 } from 'openapi3-ts'
-import type { OpenAPISpecification } from '../openapi'
-import type { HttpMethod } from '../types'
+import { OpenAPISpecification } from '../openapi'
+import { HttpMethod } from '../types'
 import { parseJoiSchema } from './parser'
 
 type RequestBodyProcessor = (
