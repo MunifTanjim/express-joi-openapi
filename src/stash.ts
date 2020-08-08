@@ -11,6 +11,7 @@ class JoiSchemaStash<SchemaMap extends Map<string, unknown>> {
   set(handler: Handler, schemaMap: SchemaMap): void {
     Object.defineProperty(handler, this.symbol, {
       value: schemaMap,
+      enumerable: true,
     })
   }
 
