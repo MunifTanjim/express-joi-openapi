@@ -49,3 +49,10 @@
 
 * make stash symbol on handler enumerable ([aec82d4](https://github.com/MunifTanjim/express-joi-openapi/commit/aec82d41c4449e24f8196170fb12e5639b4587e9))
 
+## [0.4.0](https://github.com/MunifTanjim/express-joi-openapi/compare/0.3.2...0.4.0) (2020-08-08)
+
+
+### Features
+
+* add useStringStashKey option ([c2da261](https://github.com/MunifTanjim/express-joi-openapi/commit/c2da2618f5e085f07a633b21f6170fcf4a883521))
+
