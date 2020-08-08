@@ -5,7 +5,6 @@ import {
   ValidationOptions,
 } from '@hapi/joi'
 import { Application, Handler } from 'express'
-import { OpenAPIObject } from 'openapi3-ts'
 import { OpenAPISpecification } from './openapi'
 
 export type RequestSegment =
@@ -59,4 +58,4 @@ export type PrepareOpenAPISpecification = (
   app: Application,
   basePath?: string,
   specification?: OpenAPISpecification
-) => OpenAPIObject
+) => OpenAPISpecification
