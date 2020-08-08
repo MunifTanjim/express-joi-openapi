@@ -11,15 +11,16 @@ import { RequestValidationError, ResponseValidationError } from './error'
 import { OpenAPISpecification, processExpressRoutes } from './openapi'
 import { requestSchemaStash, responseSchemaStash } from './stash'
 import type {
-  GetOpenAPISpecification,
   GetRequestValidationMiddleware,
   GetResponseValidationMiddleware,
   JoiResponseSchemaMap,
+  PrepareOpenAPISpecification,
   RequestSegment,
   ResponseSegment,
 } from './types'
 
 export * from './error'
+export { OpenAPISpecification } from './openapi'
 
 const defaultRequestSegmentOrder: RequestSegment[] = [
   'headers',
@@ -39,7 +40,7 @@ export const initializeJoiOpenApi = ({
 }): {
   getRequestValidationMiddleware: GetRequestValidationMiddleware
   getResponseValidationMiddleware: GetResponseValidationMiddleware
-  getOpenApiSpecification: GetOpenAPISpecification
+  prepareOpenApiSpecification: PrepareOpenAPISpecification
 } => {
   const getRequestValidationMiddleware: GetRequestValidationMiddleware = (
     joiRequestSchema,
@@ -184,12 +185,12 @@ export const initializeJoiOpenApi = ({
     return validationMiddleware
   }
 
-  const getOpenApiSpecification: GetOpenAPISpecification = (app, basePath) => {
-    const spec = new OpenAPISpecification()
-
-    processExpressRoutes(spec, app, basePath)
-
-    const specification = spec.toJSON()
+  const prepareOpenApiSpecification: PrepareOpenAPISpecification = (
+    app,
+    basePath,
+    specification = new OpenAPISpecification()
+  ) => {
+    processExpressRoutes(specification, app, basePath)
 
     return specification
   }
@@ -197,6 +198,6 @@ export const initializeJoiOpenApi = ({
   return {
     getRequestValidationMiddleware,
     getResponseValidationMiddleware,
-    getOpenApiSpecification,
+    prepareOpenApiSpecification,
   }
 }

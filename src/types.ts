@@ -6,6 +6,7 @@ import type {
 } from '@hapi/joi'
 import type { Application, Handler } from 'express'
 import type { OpenAPIObject } from 'openapi3-ts'
+import { OpenAPISpecification } from './openapi'
 
 export type RequestSegment =
   | 'body'
@@ -54,7 +55,8 @@ export type GetResponseValidationMiddleware = (
   options?: { segmentOrder?: ResponseSegment[] }
 ) => Handler
 
-export type GetOpenAPISpecification = (
+export type PrepareOpenAPISpecification = (
   app: Application,
-  basePath?: string
+  basePath?: string,
+  specification?: OpenAPISpecification
 ) => OpenAPIObject
