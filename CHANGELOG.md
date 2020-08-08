@@ -42,3 +42,10 @@
 
 * type PrepareOpenAPISpecification ([2830772](https://github.com/MunifTanjim/express-joi-openapi/commit/283077223525339a922cbe736a42b8394f0ab79a))
 
+### [0.3.2](https://github.com/MunifTanjim/express-joi-openapi/compare/0.3.1...0.3.2) (2020-08-08)
+
+
+### Bug Fixes
+
+* make stash symbol on handler enumerable ([aec82d4](https://github.com/MunifTanjim/express-joi-openapi/commit/aec82d41c4449e24f8196170fb12e5639b4587e9))
+
