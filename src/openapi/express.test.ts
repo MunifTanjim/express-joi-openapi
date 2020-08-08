@@ -1,7 +1,7 @@
 import express, { Handler } from 'express'
 import { OpenAPIObject } from 'openapi3-ts'
-import { OpenAPISpecificationBuilder } from './builder'
 import { processExpressRoutes } from './express'
+import { OpenAPISpecification } from './index'
 
 describe('buildSpecification', () => {
   describe('detects paths with methods', () => {
@@ -17,13 +17,13 @@ describe('buildSpecification', () => {
       )
     }
 
-    let builder: OpenAPISpecificationBuilder
+    let spec: OpenAPISpecification
     const middleware: Handler = (): void => {
       return
     }
 
     beforeEach(() => {
-      builder = new OpenAPISpecificationBuilder()
+      spec = new OpenAPISpecification()
     })
 
     test('app', () => {
@@ -32,8 +32,8 @@ describe('buildSpecification', () => {
       app.route('/:id').get(middleware).put(middleware)
       app.delete('/:id', middleware)
 
-      processExpressRoutes(builder, app)
-      const specification = builder.toJSON()
+      processExpressRoutes(spec, app)
+      const specification = spec.toJSON()
       const pathMethods = getPathMethods(specification)
 
       expect(pathMethods).toMatchInlineSnapshot(`
@@ -56,8 +56,8 @@ describe('buildSpecification', () => {
       router.route('/:id').get(middleware).put(middleware)
       router.delete('/:id', middleware)
 
-      processExpressRoutes(builder, router)
-      const specification = builder.toJSON()
+      processExpressRoutes(spec, router)
+      const specification = spec.toJSON()
       const pathMethods = getPathMethods(specification)
 
       expect(pathMethods).toMatchInlineSnapshot(`
@@ -87,8 +87,8 @@ describe('buildSpecification', () => {
 
       app.use('/router', router)
 
-      processExpressRoutes(builder, app)
-      const specification = builder.toJSON()
+      processExpressRoutes(spec, app)
+      const specification = spec.toJSON()
       const pathMethods = getPathMethods(specification)
 
       expect(pathMethods).toMatchInlineSnapshot(`
@@ -130,8 +130,8 @@ describe('buildSpecification', () => {
 
       app.use('/router', router)
 
-      processExpressRoutes(builder, app)
-      const specification = builder.toJSON()
+      processExpressRoutes(spec, app)
+      const specification = spec.toJSON()
       const pathMethods = getPathMethods(specification)
 
       expect(pathMethods).toMatchInlineSnapshot(`

@@ -7,7 +7,7 @@ import type {
   RequestBodyObject,
   ResponseObject,
 } from 'openapi3-ts'
-import type { OpenAPISpecificationBuilder } from '../openapi'
+import type { OpenAPISpecification } from '../openapi'
 import type { HttpMethod } from '../types'
 import { parseJoiSchema } from './parser'
 
@@ -23,16 +23,16 @@ type RequestParametersProcessor = (
 
 type ResponseBodyProcessor = (
   schema: Schema,
-  info: { path: string; method: HttpMethod; key: string | 'default' }
+  info: { path: string; method: HttpMethod; key: number | 'default' }
 ) => void
 
 type ResponseHeadersProcessor = (
   schema: Schema,
-  info: { path: string; method: HttpMethod; key: string | 'default' }
+  info: { path: string; method: HttpMethod; key: number | 'default' }
 ) => void
 
 export const getJoiSchemaProcessor = (
-  builder: OpenAPISpecificationBuilder
+  spec: OpenAPISpecification
 ): {
   requestBody: RequestBodyProcessor
   requestParameters: RequestParametersProcessor
@@ -50,9 +50,7 @@ export const getJoiSchemaProcessor = (
       },
     }
 
-    builder.mergePathItemOperation(path, method, {
-      requestBody,
-    })
+    spec.setPathItemOperationRequestBody(path, method, requestBody)
   },
   requestParameters: (schema, { path, method, location }) => {
     const result = parseJoiSchema(schema)
@@ -72,7 +70,7 @@ export const getJoiSchemaProcessor = (
           parameterObject.deprecated = schema.deprecated
         }
 
-        builder.addPathItemOperationParameter(path, method, parameterObject)
+        spec.addPathItemOperationParameter(path, method, parameterObject)
       }
     }
   },
@@ -80,6 +78,7 @@ export const getJoiSchemaProcessor = (
     const result = parseJoiSchema(schema)
 
     const responseObject: ResponseObject = {
+      ...spec.getPathItemOperationResponse(path, method, key),
       description: '',
       content: {
         'application/json': {
@@ -88,11 +87,7 @@ export const getJoiSchemaProcessor = (
       },
     }
 
-    builder.mergePathItemOperation(path, method, {
-      responses: {
-        [key]: responseObject,
-      },
-    })
+    spec.setPathItemOperationResponse(path, method, key, responseObject)
   },
   responseHeaders: (schema, { path, method, key }) => {
     const result = parseJoiSchema(schema)
@@ -117,14 +112,11 @@ export const getJoiSchemaProcessor = (
     }
 
     const responseObject: ResponseObject = {
+      ...spec.getPathItemOperationResponse(path, method, key),
       description: '',
       headers: headersObject,
     }
 
-    builder.mergePathItemOperation(path, method, {
-      responses: {
-        [key]: responseObject,
-      },
-    })
+    spec.setPathItemOperationResponse(path, method, key, responseObject)
   },
 })
