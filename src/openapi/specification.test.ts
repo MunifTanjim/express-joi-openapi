@@ -40,6 +40,28 @@ describe('openapi/specification', () => {
       expect(spec.info).toMatchObject({ title: 'test', version: '0.0.0' })
     })
 
+    describe('setComponent', () => {
+      test('securitySchemes', () => {
+        const spec = new OpenAPISpecification()
+        spec.setComponent('securitySchemes', 'BearerAuth', {
+          type: 'http',
+          scheme: 'bearer',
+        })
+        expect(spec.components.securitySchemes).toMatchObject({
+          BearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+          },
+        })
+      })
+    })
+
+    test('addSecurity', () => {
+      const spec = new OpenAPISpecification()
+      spec.addSecurity({ BearerAuth: [] })
+      expect(spec.security).toMatchObject([{ BearerAuth: [] }])
+    })
+
     test('toJSON', () => {
       const spec = new OpenAPISpecification()
       expect(spec.toJSON()).toMatchInlineSnapshot(`

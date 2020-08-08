@@ -337,6 +337,11 @@ export class OpenAPISpecification {
     return this.spec.security
   }
 
+  addSecurity(security: SecurityRequirementObject): this {
+    this.spec.security.push(security)
+    return this
+  }
+
   get tags(): OpenAPIObjectSkeleton['tags'] {
     return this.spec.tags
   }
