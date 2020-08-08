@@ -28,3 +28,10 @@
 
 * issues with types ([245f757](https://github.com/MunifTanjim/express-joi-openapi/commit/245f7572f4c481b7a47b3c60e7f3035a1dc5d111)), closes [#2](https://github.com/MunifTanjim/express-joi-openapi/issues/2)
 
+## [0.3.0](https://github.com/MunifTanjim/express-joi-openapi/compare/0.2.1...0.3.0) (2020-08-08)
+
+
+### Features
+
+* change stash internals ([d51b65a](https://github.com/MunifTanjim/express-joi-openapi/commit/d51b65afc0ed43f9a2c5fbc8be8dced64e45754c)), closes [#3](https://github.com/MunifTanjim/express-joi-openapi/issues/3)
+
