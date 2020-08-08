@@ -12,7 +12,6 @@ import {
   ServerObject,
   TagObject,
 } from 'openapi3-ts'
-import { SetRequired } from 'type-fest'
 import { HttpMethod } from '../types'
 
 type ComponentType =
@@ -46,7 +45,7 @@ type PathsObject = {
 type OpenAPIObjectSkeleton = {
   openapi: string
   info: InfoObject
-  components: SetRequired<Pick<ComponentsObject, ComponentType>, ComponentType>
+  components: Required<Pick<ComponentsObject, ComponentType>>
   paths: PathsObject
   security: SecurityRequirementObject[]
   tags: TagObject[]
