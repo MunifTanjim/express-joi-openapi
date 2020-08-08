@@ -13,3 +13,11 @@
 
 * circular headersObject ([eb35acc](https://github.com/MunifTanjim/express-joi-openapi/commit/eb35acca653ad44b73887b529c10a752440190f7))
 
+## [0.2.0](https://github.com/MunifTanjim/express-joi-openapi/compare/0.1.0...0.2.0) (2020-08-08)
+
+
+### Features
+
+* change initializeJoiOpenApi interface ([7dfa6a6](https://github.com/MunifTanjim/express-joi-openapi/commit/7dfa6a6229a0cd6276569c6c9c8cb234e21bde65))
+* improve openapi specification interface ([313e0d8](https://github.com/MunifTanjim/express-joi-openapi/commit/313e0d8b2acd4c207ebd0fc3a34ceeeeddbad619))
+
