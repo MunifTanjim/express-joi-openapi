@@ -1,3 +1,4 @@
+import { ReferenceObject } from 'openapi3-ts'
 import { requestSchemaStash, responseSchemaStash } from '../stash'
 import type {
   HttpMethod,
@@ -36,4 +37,10 @@ export const extractSchemaMaps = (
   }
 
   return maps
+}
+
+export const isReferenceObject = (
+  referenceObject: { [key: string]: unknown } | ReferenceObject
+): referenceObject is ReferenceObject => {
+  return '$ref' in referenceObject
 }

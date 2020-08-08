@@ -8,7 +8,7 @@ import type {
 } from '@hapi/joi'
 import type { Handler } from 'express'
 import { RequestValidationError, ResponseValidationError } from './error'
-import { OpenAPISpecificationBuilder, processExpressRoutes } from './openapi'
+import { OpenAPISpecification, processExpressRoutes } from './openapi'
 import { requestSchemaStash, responseSchemaStash } from './stash'
 import type {
   GetOpenAPISpecification,
@@ -185,11 +185,11 @@ export const initializeJoiOpenApi = ({
   }
 
   const getOpenApiSpecification: GetOpenAPISpecification = (app, basePath) => {
-    const builder = new OpenAPISpecificationBuilder()
+    const spec = new OpenAPISpecification()
 
-    processExpressRoutes(builder, app, basePath)
+    processExpressRoutes(spec, app, basePath)
 
-    const specification = builder.toJSON()
+    const specification = spec.toJSON()
 
     return specification
   }

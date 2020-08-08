@@ -2,7 +2,7 @@ import type { Application, Router } from 'express'
 import { getJoiSchemaProcessor } from '../joi'
 import type { HttpMethod } from '../types'
 import { getParameterLocation } from '../utils'
-import type { OpenAPISpecificationBuilder } from './builder'
+import type { OpenAPISpecification } from './index'
 import { StackName } from './types'
 import type { Layer, Route, StackLayer } from './types'
 import { extractSchemaMaps } from './utils'
@@ -39,7 +39,7 @@ const getPathString = (pathRegex: RegExp, keys: Layer['keys']): string => {
 }
 
 const processRoute = (
-  builder: OpenAPISpecificationBuilder,
+  spec: OpenAPISpecification,
   route: Route,
   basePath = ''
 ): void => {
@@ -54,12 +54,12 @@ const processRoute = (
       (method): method is HttpMethod => method !== '_all'
     )
 
-    if (!builder.getPathItem(path)) {
-      builder.setPathItem(path, {})
+    if (!spec.paths[path]) {
+      spec.setPathItem(path, {})
     }
 
     for (const method of methods) {
-      builder.setPathItemOperation(path, method, {
+      spec.setPathItemOperation(path, method, {
         responses: {
           default: {
             description: '',
@@ -72,7 +72,7 @@ const processRoute = (
         response: responseSchemaMap,
       } = extractSchemaMaps(route, method)
 
-      const processJoiSchema = getJoiSchemaProcessor(builder)
+      const processJoiSchema = getJoiSchemaProcessor(spec)
 
       if (requestSchemaMap) {
         for (const [segment, schema] of requestSchemaMap.entries()) {
@@ -104,7 +104,7 @@ const processRoute = (
             processJoiSchema.responseBody(schemaBySegment.body, {
               path,
               method,
-              key,
+              key: key as number | 'default',
             })
           }
 
@@ -112,7 +112,7 @@ const processRoute = (
             processJoiSchema.responseHeaders(schemaBySegment.headers, {
               path,
               method,
-              key,
+              key: key as number | 'default',
             })
           }
         }
@@ -122,14 +122,14 @@ const processRoute = (
 }
 
 export const processExpressRoutes = (
-  builder: OpenAPISpecificationBuilder,
+  spec: OpenAPISpecification,
   app: Application | Router,
   basePath = ''
 ): void => {
   const stack: StackLayer[] = app.stack ?? (app as Application)._router?.stack
 
   if (!stack) {
-    builder.setPathItem(basePath, {})
+    spec.setPathItem(basePath, {})
 
     return
   }
@@ -137,7 +137,7 @@ export const processExpressRoutes = (
   for (const layer of stack) {
     // terminal route
     if (layer.route) {
-      processRoute(builder, layer.route, basePath)
+      processRoute(spec, layer.route, basePath)
 
       continue
     }
@@ -154,7 +154,7 @@ export const processExpressRoutes = (
       const parsedPath = getPathString(layer.regexp, layer.keys)
 
       processExpressRoutes(
-        builder,
+        spec,
         layer.handle as Router,
         basePath + '/' + parsedPath
       )
@@ -170,7 +170,7 @@ export const processExpressRoutes = (
       const regexPath = ' RegExp(' + layer.regexp + ') '
 
       processExpressRoutes(
-        builder,
+        spec,
         layer.handle as Router,
         basePath + '/' + regexPath
       )
@@ -178,6 +178,6 @@ export const processExpressRoutes = (
       continue
     }
 
-    processExpressRoutes(builder, layer.handle as Router, basePath)
+    processExpressRoutes(spec, layer.handle as Router, basePath)
   }
 }
