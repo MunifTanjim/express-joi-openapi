@@ -31,7 +31,7 @@ import Joi from '@hapi/joi'
 const {
   getRequestValidationMiddleware,
   getResponseValidationMiddleware,
-  getOpenApiSpecification,
+  prepareOpenApiSpecification,
 } = initializeJoiOpenApi({ Joi })
 
 const app = express()
@@ -97,7 +97,7 @@ app.use((err, _req, res, _next) => {
   })
 })
 
-const openApiSpecification = getOpenApiSpecification(app)
+const specification = prepareOpenApiSpecification(app)
 ```
 
 ## Acknowledgement

@@ -9,7 +9,7 @@ describe('initializeJoiOpenApi', () => {
   test('basic request schema generation', () => {
     const {
       getRequestValidationMiddleware,
-      getOpenApiSpecification,
+      prepareOpenApiSpecification,
     } = initializeJoiOpenApi({ Joi })
 
     const app = express()
@@ -32,7 +32,7 @@ describe('initializeJoiOpenApi', () => {
       })
     )
 
-    const specification = getOpenApiSpecification(app)
+    const specification = prepareOpenApiSpecification(app)
 
     expect(specification.paths).toMatchSnapshot()
   })
@@ -40,7 +40,7 @@ describe('initializeJoiOpenApi', () => {
   test('basic response schema generation', async () => {
     const {
       getResponseValidationMiddleware,
-      getOpenApiSpecification,
+      prepareOpenApiSpecification,
     } = initializeJoiOpenApi({ Joi })
 
     const app = express()
@@ -63,7 +63,7 @@ describe('initializeJoiOpenApi', () => {
       }
     )
 
-    const specification = getOpenApiSpecification(app)
+    const specification = prepareOpenApiSpecification(app)
 
     expect(specification.paths).toMatchSnapshot()
 
