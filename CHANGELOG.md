@@ -35,3 +35,10 @@
 
 * change stash internals ([d51b65a](https://github.com/MunifTanjim/express-joi-openapi/commit/d51b65afc0ed43f9a2c5fbc8be8dced64e45754c)), closes [#3](https://github.com/MunifTanjim/express-joi-openapi/issues/3)
 
+### [0.3.1](https://github.com/MunifTanjim/express-joi-openapi/compare/0.3.0...0.3.1) (2020-08-08)
+
+
+### Bug Fixes
+
+* type PrepareOpenAPISpecification ([2830772](https://github.com/MunifTanjim/express-joi-openapi/commit/283077223525339a922cbe736a42b8394f0ab79a))
+
