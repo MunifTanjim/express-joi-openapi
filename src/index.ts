@@ -35,13 +35,25 @@ const defaultResponseSegmentOrder: ResponseSegment[] = ['body', 'headers']
 
 export const initializeJoiOpenApi = ({
   Joi,
+  useStringStashKey,
 }: {
   Joi: Root
+  /**
+   * if you're using a library that dynamically replaces your middlewares
+   * and the `prepareOpenApiSpecification` is not detecting your Joi schemas,
+   * then set this to `true`
+   */
+  useStringStashKey?: boolean
 }): {
   getRequestValidationMiddleware: GetRequestValidationMiddleware
   getResponseValidationMiddleware: GetResponseValidationMiddleware
   prepareOpenApiSpecification: PrepareOpenAPISpecification
 } => {
+  if (useStringStashKey) {
+    requestSchemaStash.toggleStringStashKey(useStringStashKey)
+    responseSchemaStash.toggleStringStashKey(useStringStashKey)
+  }
+
   const getRequestValidationMiddleware: GetRequestValidationMiddleware = (
     joiRequestSchema,
     joiValidationOptions = {},
