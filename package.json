@@ -2,7 +2,13 @@
   "name": "express-joi-openapi",
   "version": "0.1.0",
   "description": "Express Joi OpenAPI",
-  "keywords": [],
+  "keywords": [
+    "express",
+    "joi",
+    "oas",
+    "openapi",
+    "swagger"
+  ],
   "homepage": "https://github.com/MunifTanjim/express-joi-openapi#readme",
   "bugs": {
     "url": "https://github.com/MunifTanjim/express-joi-openapi/issues"
