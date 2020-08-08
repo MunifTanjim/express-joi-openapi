@@ -21,3 +21,10 @@
 * change initializeJoiOpenApi interface ([7dfa6a6](https://github.com/MunifTanjim/express-joi-openapi/commit/7dfa6a6229a0cd6276569c6c9c8cb234e21bde65))
 * improve openapi specification interface ([313e0d8](https://github.com/MunifTanjim/express-joi-openapi/commit/313e0d8b2acd4c207ebd0fc3a34ceeeeddbad619))
 
+### [0.2.1](https://github.com/MunifTanjim/express-joi-openapi/compare/0.2.0...0.2.1) (2020-08-08)
+
+
+### Bug Fixes
+
+* issues with types ([245f757](https://github.com/MunifTanjim/express-joi-openapi/commit/245f7572f4c481b7a47b3c60e7f3035a1dc5d111)), closes [#2](https://github.com/MunifTanjim/express-joi-openapi/issues/2)
+
