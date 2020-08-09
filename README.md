@@ -22,17 +22,18 @@ npm install --save express-joi-openapi
 ```ts
 import express from 'express'
 import {
-  initializeJoiOpenApi,
+  ExpressOpenAPI,
+  JoiRequestValidator,
+  JoiResponseValidator,
   RequestValidationError,
   ResponseValidationError,
 } from 'express-joi-openapi'
 import Joi from '@hapi/joi'
 
-const {
-  getRequestValidationMiddleware,
-  getResponseValidationMiddleware,
-  prepareOpenApiSpecification,
-} = initializeJoiOpenApi({ Joi })
+const expressOpenApi = new ExpressOpenAPI()
+
+const validateRequest = expressOpenApi.registerPlugin(JoiRequestValidator)
+const validateResponse = expressOpenApi.registerPlugin(JoiResponseValidator)
 
 const app = express()
 
@@ -40,7 +41,7 @@ app.use(express.json())
 
 app.post(
   '/ping',
-  getRequestValidationMiddleware({
+  validateRequest({
     query: {
       count: Joi.number()
         .integer()
@@ -52,7 +53,7 @@ app.post(
       type: Joi.string().valid('plastic', 'rubber', 'wood').default('rubber'),
     },
   }),
-  getResponseValidationMiddleware({
+  validateResponse({
     200: {
       body: {
         pong: Joi.number().integer().required(),
@@ -60,7 +61,7 @@ app.post(
     },
     default: {},
   }),
-  (_req, res) => {
+  (req, res) => {
     const { count } = req.query
 
     res.status(200).json({
@@ -88,6 +89,14 @@ app.use((err, _req, res, _next) => {
 
   if (err instanceof ResponseValidationError) {
     console.error(err)
+
+    res.status(500).json({
+      error: {
+        message: 'Server Error: Invalid Response Schema',
+      },
+    })
+
+    return
   }
 
   res.status(500).json({
@@ -97,7 +106,62 @@ app.use((err, _req, res, _next) => {
   })
 })
 
-const specification = prepareOpenApiSpecification(app)
+const specification = expressOpenApi.populateSpecification(app)
+```
+
+## Plugin
+
+You are not limited to the `JoiRequestValidator` and `JoiResponseValidator` plugins.
+
+You can write you own `ExpressOpenAPIPlugin` to perform arbitrary changes to the OpenAPI Specification
+for your express routes.
+
+**Plugin Example:**
+
+```ts
+import { Handler } from 'express'
+import { ExpressOpenAPIPlugin } from 'express-joi-openapi'
+
+type AuthorizationMiddleware = (permissions: string[]) => Handler
+
+export const AuthorizationPlugin: ExpressOpenAPIPlugin<
+  string[],
+  AuthorizationMiddleware
+> = {
+  name: 'authorization-plugin',
+  getMiddleware: (internals, permissions) => {
+    const middleware: Handler = async (req, res, next) => {
+      // do regular stuffs that you do in your authorization middleware
+
+      /*
+      const hasSufficientPermission = await checkUserPermission(
+        req.user,
+        permissions
+      )
+
+      if (!hasSufficientPermission) {
+        return res.status(403).json({
+          error: {
+            message: `Not Authorized`,
+          },
+        })
+      }
+      */
+
+      next()
+    }
+
+    // this will be available as a parameter to `processRoute`  function
+    internals.stash.store(middleware, permissions)
+
+    return middleware
+  },
+  processRoute: (specification, permissions, { path, method }) => {
+    specification.addPathItemOperationSecurityRequirement(path, method, {
+      BearerAuth: permissions,
+    })
+  },
+}
 ```
 
 ## Acknowledgement
