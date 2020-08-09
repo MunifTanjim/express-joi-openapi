@@ -23,8 +23,8 @@ npm install --save express-joi-openapi
 import express from 'express'
 import {
   ExpressOpenAPI,
-  JoiRequestValidator,
-  JoiResponseValidator,
+  getJoiRequestValidatorPlugin,
+  getJoiResponseValidatorPlugin,
   RequestValidationError,
   ResponseValidationError,
 } from 'express-joi-openapi'
@@ -32,8 +32,11 @@ import Joi from '@hapi/joi'
 
 const expressOpenApi = new ExpressOpenAPI()
 
-const validateRequest = expressOpenApi.registerPlugin(JoiRequestValidator)
-const validateResponse = expressOpenApi.registerPlugin(JoiResponseValidator)
+const requestValidatorPlugin = getJoiRequestValidatorPlugin()
+const responseValidatorPlugin = getJoiResponseValidatorPlugin()
+
+const validateRequest = expressOpenApi.registerPlugin(requestValidatorPlugin)
+const validateResponse = expressOpenApi.registerPlugin(responseValidatorPlugin)
 
 const app = express()
 
@@ -111,10 +114,13 @@ const specification = expressOpenApi.populateSpecification(app)
 
 ## Plugin
 
-You are not limited to the `JoiRequestValidator` and `JoiResponseValidator` plugins.
+You get the following plugins out of the box:
 
-You can write you own `ExpressOpenAPIPlugin` to perform arbitrary changes to the OpenAPI Specification
-for your express routes.
+- `JoiRequestValidatorPlugin`
+- `JoiResponseValidatorPlugin`
+
+But that's not the end of it. You can write you own `ExpressOpenAPIPlugin` to perform arbitrary changes to
+the OpenAPI Specification for your express routes.
 
 **Plugin Example:**
 
@@ -124,43 +130,51 @@ import { ExpressOpenAPIPlugin } from 'express-joi-openapi'
 
 type AuthorizationMiddleware = (permissions: string[]) => Handler
 
-export const AuthorizationPlugin: ExpressOpenAPIPlugin<
+type AuthorizationPlugin = ExpressOpenAPIPlugin<
   string[],
   AuthorizationMiddleware
-> = {
-  name: 'authorization-plugin',
-  getMiddleware: (internals, permissions) => {
-    const middleware: Handler = async (req, res, next) => {
-      // do regular stuffs that you do in your authorization middleware
+>
 
-      /*
-      const hasSufficientPermission = await checkUserPermission(
-        req.user,
-        permissions
-      )
+export const getAuthorizationPlugin = (): AuthorizationPlugin => {
+  const authorizationPlugin: AuthorizationPlugin = {
+    name: 'authorization-plugin',
 
-      if (!hasSufficientPermission) {
-        return res.status(403).json({
-          error: {
-            message: `Not Authorized`,
-          },
-        })
+    getMiddleware: (internals, permissions) => {
+      const middleware: Handler = async (req, res, next) => {
+        // do regular stuffs that you do in your authorization middleware
+
+        /*
+        const hasSufficientPermission = await checkUserPermission(
+          req.user,
+          permissions
+        )
+
+        if (!hasSufficientPermission) {
+          return res.status(403).json({
+            error: {
+              message: `Not Authorized`,
+            },
+          })
+        }
+        */
+
+        next()
       }
-      */
 
-      next()
-    }
+      // this will be available as a parameter to `processRoute`  function
+      internals.stash.store(middleware, permissions)
 
-    // this will be available as a parameter to `processRoute`  function
-    internals.stash.store(middleware, permissions)
+      return middleware
+    },
 
-    return middleware
-  },
-  processRoute: (specification, permissions, { path, method }) => {
-    specification.addPathItemOperationSecurityRequirement(path, method, {
-      BearerAuth: permissions,
-    })
-  },
+    processRoute: (specification, permissions, { path, method }) => {
+      specification.addPathItemOperationSecurityRequirement(path, method, {
+        BearerAuth: permissions,
+      })
+    },
+  }
+
+  return authorizationPlugin
 }
 ```
 
