@@ -65,3 +65,10 @@
 * make plugins configurable ([3f2a4b9](https://github.com/MunifTanjim/express-joi-openapi/commit/3f2a4b9b9c1346e1c34cc75f6e4dea92d2db64c3))
 * plugin system ([1b6ea9f](https://github.com/MunifTanjim/express-joi-openapi/commit/1b6ea9f1195af9204d5c9e1112a31ffc622db297))
 
+### [0.5.1](https://github.com/MunifTanjim/express-joi-openapi/compare/0.5.0...0.5.1) (2020-08-09)
+
+
+### Bug Fixes
+
+* type for ExpressOpenAPI.registerPlugin ([6862e03](https://github.com/MunifTanjim/express-joi-openapi/commit/6862e036eca8826ddbd237acdb7eac0adf62deeb))
+

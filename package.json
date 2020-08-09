@@ -1,6 +1,6 @@
 {
   "name": "express-joi-openapi",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Express Joi OpenAPI",
   "keywords": [
     "express",
