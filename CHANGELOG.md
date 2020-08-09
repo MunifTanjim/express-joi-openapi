@@ -56,3 +56,12 @@
 
 * add useStringStashKey option ([c2da261](https://github.com/MunifTanjim/express-joi-openapi/commit/c2da2618f5e085f07a633b21f6170fcf4a883521))
 
+## [0.5.0](https://github.com/MunifTanjim/express-joi-openapi/compare/0.4.0...0.5.0) (2020-08-09)
+
+
+### Features
+
+* add missing addSecurity method in OpenAPISpecification ([bec3e90](https://github.com/MunifTanjim/express-joi-openapi/commit/bec3e90665a52e431529d1ffa983810584eb8135))
+* make plugins configurable ([3f2a4b9](https://github.com/MunifTanjim/express-joi-openapi/commit/3f2a4b9b9c1346e1c34cc75f6e4dea92d2db64c3))
+* plugin system ([1b6ea9f](https://github.com/MunifTanjim/express-joi-openapi/commit/1b6ea9f1195af9204d5c9e1112a31ffc622db297))
+
