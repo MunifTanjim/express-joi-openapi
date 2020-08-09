@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`JoiResponseValidator validates body 1`] = `
+exports[`getJoiRequestValidatorPlugin joiResponseValidatorPlugin segment validation validates body 1`] = `
 Object {
   "error": Object {
     "details": Array [
@@ -18,7 +18,7 @@ Object {
 }
 `;
 
-exports[`JoiResponseValidator validates headers 1`] = `
+exports[`getJoiRequestValidatorPlugin joiResponseValidatorPlugin segment validation validates headers 1`] = `
 Object {
   "error": Object {
     "details": Array [
