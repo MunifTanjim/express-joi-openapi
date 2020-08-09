@@ -1,9 +1,11 @@
 import express, { Handler } from 'express'
 import { OpenAPIObject } from 'openapi3-ts'
-import { processExpressRoutes } from './express'
+import { processExpressRouters } from './express'
 import { OpenAPISpecification } from './index'
+import { RegisteredExpressOpenAPIPlugin } from '../plugins/types'
+import { Stash } from '../stash'
 
-describe('buildSpecification', () => {
+describe('processExpressRouters', () => {
   describe('detects paths with methods', () => {
     const getPathMethods = (
       specification: OpenAPIObject
@@ -32,7 +34,7 @@ describe('buildSpecification', () => {
       app.route('/:id').get(middleware).put(middleware)
       app.delete('/:id', middleware)
 
-      processExpressRoutes(spec, app)
+      processExpressRouters(spec, app, '', [])
       const specification = spec.toJSON()
       const pathMethods = getPathMethods(specification)
 
@@ -56,7 +58,7 @@ describe('buildSpecification', () => {
       router.route('/:id').get(middleware).put(middleware)
       router.delete('/:id', middleware)
 
-      processExpressRoutes(spec, router)
+      processExpressRouters(spec, router, '', [])
       const specification = spec.toJSON()
       const pathMethods = getPathMethods(specification)
 
@@ -87,7 +89,7 @@ describe('buildSpecification', () => {
 
       app.use('/router', router)
 
-      processExpressRoutes(spec, app)
+      processExpressRouters(spec, app, '', [])
       const specification = spec.toJSON()
       const pathMethods = getPathMethods(specification)
 
@@ -130,7 +132,7 @@ describe('buildSpecification', () => {
 
       app.use('/router', router)
 
-      processExpressRoutes(spec, app)
+      processExpressRouters(spec, app, '', [])
       const specification = spec.toJSON()
       const pathMethods = getPathMethods(specification)
 
@@ -160,5 +162,51 @@ describe('buildSpecification', () => {
         }
       `)
     })
+  })
+
+  test('handles plugins as expected', () => {
+    const specification = new OpenAPISpecification()
+
+    const registeredPlugin: RegisteredExpressOpenAPIPlugin = {
+      name: 'test-plugin',
+      specification,
+      stash: new Stash<string>(Symbol('test-plugin')),
+      processRoute: jest.fn(),
+    }
+
+    const middleware: Handler = (): void => {
+      return
+    }
+
+    const pluginMiddleware: Handler = (): void => {
+      return
+    }
+
+    const app = express()
+    app.post('/', middleware, pluginMiddleware)
+    app.route('/:id').get(middleware, pluginMiddleware).put(middleware)
+    app.delete('/:id', middleware)
+
+    processExpressRouters(specification, app, '', [registeredPlugin])
+
+    expect(registeredPlugin.processRoute).not.toBeCalled()
+
+    registeredPlugin.stash.store(pluginMiddleware, 'forty-two')
+
+    processExpressRouters(specification, app, '', [registeredPlugin])
+
+    expect(registeredPlugin.processRoute).toBeCalledTimes(2)
+    expect(registeredPlugin.processRoute).toHaveBeenNthCalledWith(
+      1,
+      specification,
+      'forty-two',
+      { method: 'post', path: '/' }
+    )
+    expect(registeredPlugin.processRoute).toHaveBeenNthCalledWith(
+      2,
+      specification,
+      'forty-two',
+      { method: 'get', path: '/{id}' }
+    )
   })
 })

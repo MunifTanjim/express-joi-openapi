@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`JoiResponseValidator validates body 1`] = `
+Object {
+  "error": Object {
+    "details": Array [
+      Object {
+        "message": "\\"pong\\" must be a number",
+        "path": Array [
+          "pong",
+        ],
+        "type": "number.base",
+      },
+    ],
+    "message": "\\"pong\\" must be a number",
+    "segment": "body",
+  },
+}
+`;
+
+exports[`JoiResponseValidator validates headers 1`] = `
+Object {
+  "error": Object {
+    "details": Array [
+      Object {
+        "message": "\\"x-count\\" is required",
+        "path": Array [
+          "x-count",
+        ],
+        "type": "any.required",
+      },
+    ],
+    "message": "\\"x-count\\" is required",
+    "segment": "headers",
+  },
+}
+`;

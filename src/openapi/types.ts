@@ -15,7 +15,7 @@ export interface Layer {
   params?: Record<string, any>
   path?: string
   keys: Key[]
-  regexp: RegExp & { fast_star: boolean; fast_slash: boolean }
+  regexp: RegExp & { fast_star?: boolean; fast_slash?: boolean }
 }
 
 export interface StackLayer extends Layer {

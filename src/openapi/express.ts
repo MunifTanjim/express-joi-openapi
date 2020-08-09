@@ -1,10 +1,8 @@
 import { Application, Router } from 'express'
-import { getJoiSchemaProcessor } from '../joi'
+import { RegisteredExpressOpenAPIPlugin } from '../plugins/types'
 import { HttpMethod } from '../types'
-import { getParameterLocation } from '../utils'
 import { OpenAPISpecification } from './index'
 import { Layer, Route, StackLayer, StackName } from './types'
-import { extractSchemaMaps } from './utils'
 
 const regexPattern = {
   param: /\(\?:\(\[\^\\\/]\+\?\)\)/,
@@ -40,7 +38,8 @@ const getPathString = (pathRegex: RegExp, keys: Layer['keys']): string => {
 const processRoute = (
   spec: OpenAPISpecification,
   route: Route,
-  basePath = ''
+  basePath = '',
+  plugins: RegisteredExpressOpenAPIPlugin[]
 ): void => {
   const routePaths = Array.isArray(route.path) ? route.path : [route.path]
 
@@ -49,7 +48,7 @@ const processRoute = (
       basePath ? `${basePath}${routePath === '/' ? '' : routePath}` : routePath
     }`.replace(/:([a-zA-Z0-9_]+)/g, '{$1}')
 
-    const methods: HttpMethod[] = Object.keys(route.methods).filter(
+    const methods = Object.keys(route.methods).filter(
       (method): method is HttpMethod => method !== '_all'
     )
 
@@ -66,64 +65,24 @@ const processRoute = (
         },
       })
 
-      const {
-        request: requestSchemaMap,
-        response: responseSchemaMap,
-      } = extractSchemaMaps(route, method)
-
-      const processJoiSchema = getJoiSchemaProcessor(spec)
-
-      if (requestSchemaMap) {
-        for (const [segment, schema] of requestSchemaMap.entries()) {
-          if (!schema) {
-            continue
-          }
-
-          if (segment === 'body') {
-            processJoiSchema.requestBody(schema, { path, method })
-          } else {
-            const location = getParameterLocation(segment)
-
-            processJoiSchema.requestParameters(schema, {
-              path,
-              method,
-              location,
-            })
-          }
-        }
-      }
-
-      if (responseSchemaMap) {
-        for (const [key, schemaBySegment] of responseSchemaMap.entries()) {
-          if (!schemaBySegment) {
-            continue
-          }
-
-          if (schemaBySegment.body) {
-            processJoiSchema.responseBody(schemaBySegment.body, {
-              path,
-              method,
-              key: key as number | 'default',
-            })
-          }
-
-          if (schemaBySegment.headers) {
-            processJoiSchema.responseHeaders(schemaBySegment.headers, {
-              path,
-              method,
-              key: key as number | 'default',
-            })
-          }
+      for (const plugin of plugins) {
+        const stashedValue = plugin.stash.find(route, method)
+        if (stashedValue) {
+          plugin.processRoute(plugin.specification, stashedValue, {
+            path,
+            method,
+          })
         }
       }
     }
   })
 }
 
-export const processExpressRoutes = (
+export const processExpressRouters = (
   spec: OpenAPISpecification,
   app: Application | Router,
-  basePath = ''
+  basePath = '',
+  plugins: RegisteredExpressOpenAPIPlugin[]
 ): void => {
   const stack: StackLayer[] = app.stack ?? (app as Application)._router?.stack
 
@@ -136,7 +95,7 @@ export const processExpressRoutes = (
   for (const layer of stack) {
     // terminal route
     if (layer.route) {
-      processRoute(spec, layer.route, basePath)
+      processRoute(spec, layer.route, basePath, plugins)
 
       continue
     }
@@ -152,10 +111,11 @@ export const processExpressRoutes = (
     if (regexPattern.path.test(layer.regexp.source)) {
       const parsedPath = getPathString(layer.regexp, layer.keys)
 
-      processExpressRoutes(
+      processExpressRouters(
         spec,
         layer.handle as Router,
-        basePath + '/' + parsedPath
+        basePath + '/' + parsedPath,
+        plugins
       )
 
       continue
@@ -168,15 +128,16 @@ export const processExpressRoutes = (
     ) {
       const regexPath = ' RegExp(' + layer.regexp + ') '
 
-      processExpressRoutes(
+      processExpressRouters(
         spec,
         layer.handle as Router,
-        basePath + '/' + regexPath
+        basePath + '/' + regexPath,
+        plugins
       )
 
       continue
     }
 
-    processExpressRoutes(spec, layer.handle as Router, basePath)
+    processExpressRouters(spec, layer.handle as Router, basePath, plugins)
   }
 }
