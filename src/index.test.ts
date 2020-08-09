@@ -2,7 +2,10 @@ import Joi from '@hapi/joi'
 import express from 'express'
 import request from 'supertest'
 import { ExpressOpenAPI } from './index'
-import { JoiRequestValidator, JoiResponseValidator } from './plugins'
+import {
+  getJoiRequestValidatorPlugin,
+  getJoiResponseValidatorPlugin,
+} from './plugins'
 
 describe('ExpressOpenAPI', () => {
   describe('constructor', () => {
@@ -21,7 +24,7 @@ describe('ExpressOpenAPI', () => {
     const expressOpenApi = new ExpressOpenAPI()
 
     const getRequestValidationMiddleware = expressOpenApi.registerPlugin(
-      JoiRequestValidator
+      getJoiRequestValidatorPlugin()
     )
 
     const app = express()
@@ -53,7 +56,7 @@ describe('ExpressOpenAPI', () => {
     const expressOpenApi = new ExpressOpenAPI()
 
     const getResponseValidationMiddleware = expressOpenApi.registerPlugin(
-      JoiResponseValidator
+      getJoiResponseValidatorPlugin()
     )
 
     const app = express()

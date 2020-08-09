@@ -24,9 +24,13 @@ type JoiResponseValidationSchema = {
 
 export type GetJoiResponseValidatorMiddleware = (
   joiResponseSchema: JoiResponseValidationSchema,
-  joiValidationOptions?: ValidationOptions,
-  options?: { segmentOrder?: ResponseSegment[] }
+  joiValidationOptions?: ValidationOptions
 ) => Handler
+
+type JoiResponseValidatorPlugin = ExpressOpenAPIPlugin<
+  JoiResponseSchemaMap,
+  GetJoiResponseValidatorMiddleware
+>
 
 export class ResponseValidationError extends Error {
   segment: ResponseSegment
@@ -42,173 +46,183 @@ export class ResponseValidationError extends Error {
 
 const defaultResponseSegmentOrder: ResponseSegment[] = ['body', 'headers']
 
-export const JoiResponseValidator: ExpressOpenAPIPlugin<
-  JoiResponseSchemaMap,
-  GetJoiResponseValidatorMiddleware
-> = {
-  name: 'joi-response-validation',
+export const getJoiResponseValidatorPlugin = ({
+  skipValidation = false,
+  segmentOrder = defaultResponseSegmentOrder,
+}: {
+  skipValidation?: boolean
+  segmentOrder?: ResponseSegment[]
+} = {}): JoiResponseValidatorPlugin => {
+  const joiResponseValidatorPlugin: JoiResponseValidatorPlugin = {
+    name: 'joi-response-validator',
 
-  getMiddleware: (
-    internals,
-    joiResponseSchema,
-    joiValidationOptions = {},
-    { segmentOrder = defaultResponseSegmentOrder } = {}
-  ): Handler => {
-    const schemaMap: JoiResponseSchemaMap = new Map()
+    getMiddleware: (
+      internals,
+      joiResponseSchema,
+      joiValidationOptions = {}
+    ): Handler => {
+      const schemaMap: JoiResponseSchemaMap = new Map()
 
-    for (const [code, schemaBySegment] of Object.entries(joiResponseSchema)) {
-      schemaMap.set(
-        code,
-        Object.entries(schemaBySegment).reduce<
-          { [key in ResponseSegment]?: Schema }
-        >((bySegment, [segment, schema]) => {
-          if (schema) {
-            bySegment[segment as ResponseSegment] = Joi.compile(schema)
-          }
-          return bySegment
-        }, {})
-      )
-    }
-
-    const validationOptions: ValidationOptions = {
-      ...joiValidationOptions,
-    }
-
-    const validationMiddleware: Handler = async (
-      _req,
-      res,
-      next
-    ): Promise<void> => {
-      const originalSend = res.send
-
-      res.send = function validateAndSendResponse(...args) {
-        const body = args[0]
-
-        const isJsonContent = /application\/json/.test(
-          String(res.get('content-type'))
+      for (const [code, schemaBySegment] of Object.entries(joiResponseSchema)) {
+        schemaMap.set(
+          code,
+          Object.entries(schemaBySegment).reduce<
+            { [key in ResponseSegment]?: Schema }
+          >((bySegment, [segment, schema]) => {
+            if (schema) {
+              bySegment[segment as ResponseSegment] = Joi.compile(schema)
+            }
+            return bySegment
+          }, {})
         )
+      }
 
-        const value: { [key in ResponseSegment]: unknown } = {
-          body: isJsonContent ? JSON.parse(body) : body,
-          headers: res.getHeaders(),
+      const validationOptions: ValidationOptions = {
+        ...joiValidationOptions,
+      }
+
+      const validationMiddleware: Handler = async (
+        _req,
+        res,
+        next
+      ): Promise<void> => {
+        if (skipValidation) {
+          return next()
         }
 
-        const schemaBySegment = schemaMap.has(String(res.statusCode))
-          ? schemaMap.get(String(res.statusCode))
-          : schemaMap.get('default')
+        const originalSend = res.send
 
+        res.send = function validateAndSendResponse(...args) {
+          const body = args[0]
+
+          const isJsonContent = /application\/json/.test(
+            String(res.get('content-type'))
+          )
+
+          const value: { [key in ResponseSegment]: unknown } = {
+            body: isJsonContent ? JSON.parse(body) : body,
+            headers: res.getHeaders(),
+          }
+
+          const schemaBySegment = schemaMap.has(String(res.statusCode))
+            ? schemaMap.get(String(res.statusCode))
+            : schemaMap.get('default')
+
+          if (!schemaBySegment) {
+            throw new Error(
+              `Validation Schema not found for Response(${res.statusCode})`
+            )
+          }
+
+          for (const segment of segmentOrder) {
+            const schema = schemaBySegment[segment]
+
+            if (!schema) {
+              continue
+            }
+
+            const validationResult = schema.validate(
+              value[segment],
+              validationOptions
+            )
+
+            if (validationResult.error) {
+              throw new ResponseValidationError(validationResult.error, segment)
+            }
+
+            if (segment === 'body') {
+              value[segment] = validationResult.value
+            }
+          }
+
+          return originalSend.apply(res, [
+            isJsonContent ? JSON.stringify(value.body) : value.body,
+          ])
+        }
+
+        next()
+      }
+
+      internals.stash.store(validationMiddleware, schemaMap)
+
+      return validationMiddleware
+    },
+
+    processRoute: (specification, schemaMap, { path, method }): void => {
+      for (const [key, schemaBySegment] of schemaMap.entries()) {
         if (!schemaBySegment) {
-          throw new Error(
-            `Validation Schema not found for Response(${res.statusCode})`
-          )
+          continue
         }
 
-        for (const segment of segmentOrder) {
-          const schema = schemaBySegment[segment]
+        const httpStatusCode = key as number | 'default'
 
-          if (!schema) {
-            continue
-          }
+        if (schemaBySegment.body) {
+          const result = parseJoiSchema(schemaBySegment.body)
 
-          const validationResult = schema.validate(
-            value[segment],
-            validationOptions
-          )
-
-          if (validationResult.error) {
-            throw new ResponseValidationError(validationResult.error, segment)
-          }
-
-          if (segment === 'body') {
-            value[segment] = validationResult.value
-          }
-        }
-
-        return originalSend.apply(res, [
-          isJsonContent ? JSON.stringify(value.body) : value.body,
-        ])
-      }
-
-      next()
-    }
-
-    internals.stash.store(validationMiddleware, schemaMap)
-
-    return validationMiddleware
-  },
-
-  processRoute: (specification, schemaMap, { path, method }): void => {
-    for (const [key, schemaBySegment] of schemaMap.entries()) {
-      if (!schemaBySegment) {
-        continue
-      }
-
-      const httpStatusCode = key as number | 'default'
-
-      if (schemaBySegment.body) {
-        const result = parseJoiSchema(schemaBySegment.body)
-
-        const responseObject: ResponseObject = {
-          ...specification.getPathItemOperationResponse(
-            path,
-            method,
-            httpStatusCode
-          ),
-          description: '',
-          content: {
-            'application/json': {
-              schema: result.schema,
+          const responseObject: ResponseObject = {
+            ...specification.getPathItemOperationResponse(
+              path,
+              method,
+              httpStatusCode
+            ),
+            description: '',
+            content: {
+              'application/json': {
+                schema: result.schema,
+              },
             },
-          },
-        }
-
-        specification.setPathItemOperationResponse(
-          path,
-          method,
-          httpStatusCode,
-          responseObject
-        )
-      }
-
-      if (schemaBySegment.headers) {
-        const result = parseJoiSchema(schemaBySegment.headers)
-
-        const { properties, required = [] } = result.schema
-
-        const headersObject: HeadersObject = {}
-
-        if (properties) {
-          for (const [name, schema] of Object.entries(properties)) {
-            const headerObject: HeaderObject = {
-              schema: schema,
-              required: required.includes(name),
-            }
-
-            if ('deprecated' in schema) {
-              headerObject.deprecated = schema.deprecated
-            }
-
-            headersObject[name] = headerObject
           }
-        }
 
-        const responseObject: ResponseObject = {
-          ...specification.getPathItemOperationResponse(
+          specification.setPathItemOperationResponse(
             path,
             method,
-            httpStatusCode
-          ),
-          description: '',
-          headers: headersObject,
+            httpStatusCode,
+            responseObject
+          )
         }
 
-        specification.setPathItemOperationResponse(
-          path,
-          method,
-          httpStatusCode,
-          responseObject
-        )
+        if (schemaBySegment.headers) {
+          const result = parseJoiSchema(schemaBySegment.headers)
+
+          const { properties, required = [] } = result.schema
+
+          const headersObject: HeadersObject = {}
+
+          if (properties) {
+            for (const [name, schema] of Object.entries(properties)) {
+              const headerObject: HeaderObject = {
+                schema: schema,
+                required: required.includes(name),
+              }
+
+              if ('deprecated' in schema) {
+                headerObject.deprecated = schema.deprecated
+              }
+
+              headersObject[name] = headerObject
+            }
+          }
+
+          const responseObject: ResponseObject = {
+            ...specification.getPathItemOperationResponse(
+              path,
+              method,
+              httpStatusCode
+            ),
+            description: '',
+            headers: headersObject,
+          }
+
+          specification.setPathItemOperationResponse(
+            path,
+            method,
+            httpStatusCode,
+            responseObject
+          )
+        }
       }
-    }
-  },
+    },
+  }
+
+  return joiResponseValidatorPlugin
 }

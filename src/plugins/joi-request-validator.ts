@@ -28,9 +28,13 @@ type JoiRequestValidationSchema = { [segment in RequestSegment]?: SchemaLike }
 
 export type GetJoiRequestValidatorMiddleware = (
   joiRequestSchema: JoiRequestValidationSchema,
-  joiValidationOptions?: AsyncValidationOptions,
-  options?: { segmentOrder?: RequestSegment[] }
+  joiValidationOptions?: AsyncValidationOptions
 ) => Handler
+
+type JoiRequestValidatorPlugin = ExpressOpenAPIPlugin<
+  JoiRequestSchemaMap,
+  GetJoiRequestValidatorMiddleware
+>
 
 export class RequestValidationError extends Error {
   segment: RequestSegment
@@ -63,116 +67,122 @@ const defaultRequestSegmentOrder: RequestSegment[] = [
   'body',
 ]
 
-export const JoiRequestValidator: ExpressOpenAPIPlugin<
-  JoiRequestSchemaMap,
-  GetJoiRequestValidatorMiddleware
-> = {
-  name: 'joi-request-validator',
+export const getJoiRequestValidatorPlugin = ({
+  segmentOrder = defaultRequestSegmentOrder,
+}: { segmentOrder?: RequestSegment[] } = {}): JoiRequestValidatorPlugin => {
+  const joiRequestValidatorPlugin: JoiRequestValidatorPlugin = {
+    name: 'joi-request-validator',
 
-  getMiddleware: (
-    internals,
-    joiRequestSchema,
-    joiValidationOptions = {},
-    { segmentOrder = defaultRequestSegmentOrder } = {}
-  ): Handler => {
-    const schemaMap: JoiRequestSchemaMap = new Map()
+    getMiddleware: (
+      internals,
+      joiRequestSchema,
+      joiValidationOptions = {}
+    ): Handler => {
+      const schemaMap: JoiRequestSchemaMap = new Map()
 
-    for (const segment of segmentOrder) {
-      const schema = joiRequestSchema[segment]
-      if (schema) {
-        schemaMap.set(segment, Joi.compile(schema))
+      for (const segment of segmentOrder) {
+        const schema = joiRequestSchema[segment]
+        if (schema) {
+          schemaMap.set(segment, Joi.compile(schema))
+        }
       }
-    }
 
-    const validationOptions: AsyncValidationOptions = {
-      ...joiValidationOptions,
-    }
+      const validationOptions: AsyncValidationOptions = {
+        ...joiValidationOptions,
+      }
 
-    const requestValidationMiddleware: Handler = async (
-      req,
-      _res,
-      next
-    ): Promise<void> => {
-      try {
-        await segmentOrder.reduce((promise, segment) => {
-          return promise.then(() => {
-            const schema = schemaMap.get(segment)
+      const requestValidationMiddleware: Handler = async (
+        req,
+        _res,
+        next
+      ): Promise<void> => {
+        try {
+          await segmentOrder.reduce((promise, segment) => {
+            return promise.then(() => {
+              const schema = schemaMap.get(segment)
 
-            if (!schema) {
-              return null
-            }
-
-            return schema
-              .validateAsync(req[segment], validationOptions)
-              .then(({ value }: ValidationResult) => {
-                req[segment] = value
+              if (!schema) {
                 return null
-              })
-              .catch((error: ValidationError) => {
-                throw new RequestValidationError(error, segment)
-              })
-          })
-        }, Promise.resolve(null))
+              }
 
-        next()
-      } catch (error) {
-        next(error)
-      }
-    }
+              return schema
+                .validateAsync(req[segment], validationOptions)
+                .then(({ value }: ValidationResult) => {
+                  req[segment] = value
+                  return null
+                })
+                .catch((error: ValidationError) => {
+                  throw new RequestValidationError(error, segment)
+                })
+            })
+          }, Promise.resolve(null))
 
-    internals.stash.store(requestValidationMiddleware, schemaMap)
-
-    return requestValidationMiddleware
-  },
-
-  processRoute: (specification, schemaMap, { path, method }): void => {
-    for (const [segment, schema] of schemaMap.entries()) {
-      if (!schema) {
-        continue
+          next()
+        } catch (error) {
+          next(error)
+        }
       }
 
-      if (segment === 'body') {
-        const result = parseJoiSchema(schema)
+      internals.stash.store(requestValidationMiddleware, schemaMap)
 
-        const requestBody: RequestBodyObject = {
-          content: {
-            'application/json': {
-              schema: result.schema,
-            },
-          },
+      return requestValidationMiddleware
+    },
+
+    processRoute: (specification, schemaMap, { path, method }): void => {
+      for (const [segment, schema] of schemaMap.entries()) {
+        if (!schema) {
+          continue
         }
 
-        specification.setPathItemOperationRequestBody(path, method, requestBody)
+        if (segment === 'body') {
+          const result = parseJoiSchema(schema)
 
-        return
-      }
-
-      const location = parameterLocationBySegment[segment]
-
-      const result = parseJoiSchema(schema)
-
-      const { properties, required = [] } = result.schema
-
-      if (properties) {
-        for (const [name, schema] of Object.entries(properties)) {
-          const parameterObject: ParameterObject = {
-            name,
-            in: location,
-            schema: schema,
-            required: required.includes(name),
+          const requestBody: RequestBodyObject = {
+            content: {
+              'application/json': {
+                schema: result.schema,
+              },
+            },
           }
 
-          if ('deprecated' in schema) {
-            parameterObject.deprecated = schema.deprecated
-          }
-
-          specification.addPathItemOperationParameter(
+          specification.setPathItemOperationRequestBody(
             path,
             method,
-            parameterObject
+            requestBody
           )
+
+          return
+        }
+
+        const location = parameterLocationBySegment[segment]
+
+        const result = parseJoiSchema(schema)
+
+        const { properties, required = [] } = result.schema
+
+        if (properties) {
+          for (const [name, schema] of Object.entries(properties)) {
+            const parameterObject: ParameterObject = {
+              name,
+              in: location,
+              schema: schema,
+              required: required.includes(name),
+            }
+
+            if ('deprecated' in schema) {
+              parameterObject.deprecated = schema.deprecated
+            }
+
+            specification.addPathItemOperationParameter(
+              path,
+              method,
+              parameterObject
+            )
+          }
         }
       }
-    }
-  },
+    },
+  }
+
+  return joiRequestValidatorPlugin
 }
