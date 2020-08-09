@@ -1,42 +1,34 @@
 import { Handler } from 'express'
-import { JoiRequestSchemaMap, JoiResponseSchemaMap } from './types'
+import { Route } from './openapi/types'
+import { HttpMethod } from './types'
 
-class JoiSchemaStash<SchemaMap extends Map<string, unknown>> {
-  private symbol: symbol
-  private symbolKey: symbol | string
+export class Stash<Value extends any> {
+  private stashKey: string | symbol
 
-  constructor(symbol: symbol) {
-    this.symbol = symbol
-    this.symbolKey = this.symbol
+  constructor(stashKey: string | symbol) {
+    this.stashKey = stashKey
   }
 
-  toggleStringStashKey(enable?: boolean): boolean {
-    if (typeof enable !== 'boolean') {
-      enable = typeof this.symbolKey !== 'string'
+  find = (route: Route, method: HttpMethod): Value | null => {
+    for (const layer of route.stack) {
+      if (layer.method === method) {
+        const descriptor = Object.getOwnPropertyDescriptor(
+          layer.handle,
+          this.stashKey
+        )
+        if (descriptor) {
+          return descriptor.value
+        }
+      }
     }
 
-    this.symbolKey = enable ? this.symbol.toString() : this.symbol
-
-    return enable
+    return null
   }
 
-  set(handler: Handler, schemaMap: SchemaMap): void {
-    Object.defineProperty(handler, this.symbolKey, {
-      value: schemaMap,
+  store = (handler: Handler, value: Value): void => {
+    Object.defineProperty(handler, this.stashKey, {
+      value,
       enumerable: true,
     })
   }
-
-  get(handler: Handler): SchemaMap | null {
-    const descriptor = Object.getOwnPropertyDescriptor(handler, this.symbolKey)
-    return descriptor ? descriptor.value : null
-  }
 }
-
-export const requestSchemaStash = new JoiSchemaStash<JoiRequestSchemaMap>(
-  Symbol('request_schema_map')
-)
-
-export const responseSchemaStash = new JoiSchemaStash<JoiResponseSchemaMap>(
-  Symbol('response_schema_map')
-)

@@ -1,69 +1,69 @@
 import { Handler } from 'express'
-import { requestSchemaStash, responseSchemaStash } from './stash'
+import { Stash } from './stash'
 
-describe('stash', () => {
-  test('works as expected', () => {
+describe('Stash', () => {
+  test('with symbol stashKey', () => {
+    const stash = new Stash<string>(Symbol('forty-two'))
+
     const handler: Handler = () => {
       return
     }
 
-    const requestSchemaMap = new Map()
-    requestSchemaStash.set(handler, requestSchemaMap)
-    expect(requestSchemaStash.get(handler)).toBe(requestSchemaMap)
-
-    const responseSchemaMap = new Map()
-    responseSchemaStash.set(handler, responseSchemaMap)
-    expect(responseSchemaStash.get(handler)).toBe(responseSchemaMap)
+    stash.store(handler, 'pong')
 
     expect(Object.getOwnPropertySymbols(handler)).toMatchInlineSnapshot(`
       Array [
-        Symbol(request_schema_map),
-        Symbol(response_schema_map),
+        Symbol(forty-two),
       ]
     `)
+
+    expect(
+      stash.find(
+        {
+          path: '',
+          stack: [{ handle: handler, method: 'get' } as any],
+          methods: { get: true },
+        },
+        'get'
+      )
+    ).toBe('pong')
+
+    expect(
+      stash.find(
+        {
+          path: '',
+          stack: [{ handle: handler, method: 'get' } as any],
+          methods: { get: true },
+        },
+        'post'
+      )
+    ).toBe(null)
   })
 
-  test('toggleStringStashKey works', () => {
-    let usingStringKey = false
+  test('with string stashKey', () => {
+    const stash = new Stash<string>('forty-two')
 
-    const requestSchemaMap = new Map()
-
-    usingStringKey = requestSchemaStash.toggleStringStashKey(true)
-    expect(usingStringKey).toBe(true)
-
-    const handler1: Handler = () => {
+    const handler: Handler = () => {
       return
     }
 
-    requestSchemaStash.set(handler1, requestSchemaMap)
+    stash.store(handler, 'pong')
 
-    expect(Object.keys(handler1)).toMatchInlineSnapshot(`
+    expect(Object.keys(handler)).toMatchInlineSnapshot(`
       Array [
-        "Symbol(request_schema_map)",
+        "forty-two",
       ]
     `)
 
-    expect(Object.getOwnPropertySymbols(handler1)).toMatchInlineSnapshot(
-      `Array []`
-    )
-
-    usingStringKey = requestSchemaStash.toggleStringStashKey()
-    expect(usingStringKey).toBe(false)
-    usingStringKey = requestSchemaStash.toggleStringStashKey(false)
-    expect(usingStringKey).toBe(false)
-
-    const handler2: Handler = () => {
-      return
-    }
-
-    requestSchemaStash.set(handler2, requestSchemaMap)
-
-    expect(Object.keys(handler2)).toMatchInlineSnapshot(`Array []`)
-
-    expect(Object.getOwnPropertySymbols(handler2)).toMatchInlineSnapshot(`
-      Array [
-        Symbol(request_schema_map),
-      ]
-    `)
+    expect(
+      stash.find(
+        {
+          path: '',
+          stack: [{ handle: handler, method: 'get' } as any],
+          methods: { get: true },
+        },
+        'get'
+      )
+    ).toBe('pong')
   })
 })
