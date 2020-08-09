@@ -62,6 +62,24 @@ describe('openapi/specification', () => {
       expect(spec.security).toMatchObject([{ BearerAuth: [] }])
     })
 
+    test('addTag', () => {
+      const spec = new OpenAPISpecification()
+      spec.addTag({ name: 'life' })
+      expect(spec.tags).toMatchObject([{ name: 'life' }])
+    })
+
+    test('addServer', () => {
+      const spec = new OpenAPISpecification()
+      spec.addServer({ url: 'https://example.com' })
+      expect(spec.servers).toMatchObject([{ url: 'https://example.com' }])
+    })
+
+    test('setExternalDocs', () => {
+      const spec = new OpenAPISpecification()
+      spec.setExternalDocs({ url: 'https://example.com' })
+      expect(spec.externalDocs).toMatchObject({ url: 'https://example.com' })
+    })
+
     test('toJSON', () => {
       const spec = new OpenAPISpecification()
       expect(spec.toJSON()).toMatchInlineSnapshot(`
