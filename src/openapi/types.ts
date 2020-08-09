@@ -1,5 +1,4 @@
 import { Router } from 'express'
-import { Key } from 'path-to-regexp'
 import { HttpMethod } from '../types'
 
 export const enum StackName {
@@ -8,6 +7,14 @@ export const enum StackName {
   BOUND_DISPATCH = 'bound dispatch',
   ROUTER = 'router',
   MOUNTED_APP = 'mounted_app',
+}
+
+interface Key {
+  name: string | number
+  prefix: string
+  suffix: string
+  pattern: string
+  modifier: string
 }
 
 export interface Layer {
