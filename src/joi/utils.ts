@@ -80,7 +80,3 @@ export const getMetas = <
     {} as Metas
   )
 }
-
-export const toStringPattern = (regex: RegExp): string => {
-  return String(regex).slice(1, -1)
-}

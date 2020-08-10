@@ -7,7 +7,6 @@ import {
   isDeprecated,
   isRuleName,
   isSchemaType,
-  toStringPattern,
 } from './utils'
 
 type ParsedResult = {
@@ -369,32 +368,32 @@ function parseStringSchema(schema: JoiSchema<'string'>): ParsedResult {
 
       if (caseRule && !isStrict) {
         if (caseRule.args.direction === 'upper') {
-          result.schema.pattern = toStringPattern(/^[A-Z0-9]*$/)
+          result.schema.pattern = /^[A-Z0-9]*$/.source
         }
 
         if (caseRule.args.direction === 'lower') {
-          result.schema.pattern = toStringPattern(/^[a-z0-9]*$/)
+          result.schema.pattern = /^[a-z0-9]*$/.source
         }
       } else {
-        result.schema.pattern = toStringPattern(/^[a-zA-Z0-9]*$/)
+        result.schema.pattern = /^[a-zA-Z0-9]*$/.source
       }
     }
 
     if (isRuleName(rule, 'token')) {
-      result.schema.pattern = toStringPattern(/^[a-zA-Z0-9_]*$/)
+      result.schema.pattern = /^[a-zA-Z0-9_]*$/.source
     }
 
     if (isRuleName(rule, 'pattern')) {
       if (typeof rule.args.options !== 'string' && rule.args.options?.invert) {
         result.schema.not = {
           ...result.schema.not,
-          pattern: toStringPattern(rule.args.regex),
+          pattern: rule.args.regex.source,
         }
       } else {
-        result.schema.pattern = toStringPattern(rule.args.regex)
+        result.schema.pattern = rule.args.regex.source
       }
     } else if (rule.regex) {
-      result.schema.pattern = toStringPattern(rule.regex)
+      result.schema.pattern = rule.regex.source
     }
 
     if (isRuleName(rule, 'length')) {
