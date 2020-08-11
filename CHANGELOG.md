@@ -72,3 +72,10 @@
 
 * type for ExpressOpenAPI.registerPlugin ([6862e03](https://github.com/MunifTanjim/express-joi-openapi/commit/6862e036eca8826ddbd237acdb7eac0adf62deeb))
 
+### [0.5.2](https://github.com/MunifTanjim/express-joi-openapi/compare/0.5.1...0.5.2) (2020-08-11)
+
+
+### Bug Fixes
+
+* joi parseObjectSchema w/o keys ([2e9d780](https://github.com/MunifTanjim/express-joi-openapi/commit/2e9d78087592e7463d6bd7ac7901f8630ebc1cb1))
+
