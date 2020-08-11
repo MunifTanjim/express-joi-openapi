@@ -289,7 +289,9 @@ function parseObjectSchema(schema: JoiSchema<'object'>): ParsedResult {
 
   const required: string[] = []
 
-  for (const key of $_terms.keys) {
+  const keys = $_terms.keys ?? []
+
+  for (const key of keys) {
     const name = key.key
 
     const keyResult = parseJoiSchema(key.schema)

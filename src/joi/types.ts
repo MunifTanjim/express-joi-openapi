@@ -138,7 +138,7 @@ interface JoiNumberSchemaTerms extends JoiAnySchemaTerms {
 
 interface JoiObjectSchemaTerms extends JoiAnySchemaTerms {
   dependencies: null
-  keys: { key: string; schema: Schema }[]
+  keys: null | { key: string; schema: Schema }[]
   patterns: null
   renames: null
 }

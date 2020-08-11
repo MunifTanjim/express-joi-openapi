@@ -85,4 +85,37 @@ describe('parseJoiSchema', () => {
       `)
     })
   })
+
+  describe('object', () => {
+    test('w/ keys', () => {
+      expect(parseJoiSchema(Joi.object({ a: Joi.string() })))
+        .toMatchInlineSnapshot(`
+        Object {
+          "meta": Object {},
+          "schema": Object {
+            "additionalProperties": false,
+            "properties": Object {
+              "a": Object {
+                "type": "string",
+              },
+            },
+            "type": "object",
+          },
+        }
+      `)
+    })
+
+    test('w/o keys', () => {
+      expect(parseJoiSchema(Joi.object())).toMatchInlineSnapshot(`
+        Object {
+          "meta": Object {},
+          "schema": Object {
+            "additionalProperties": false,
+            "properties": Object {},
+            "type": "object",
+          },
+        }
+      `)
+    })
+  })
 })
