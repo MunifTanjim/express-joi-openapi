@@ -79,3 +79,10 @@
 
 * joi parseObjectSchema w/o keys ([2e9d780](https://github.com/MunifTanjim/express-joi-openapi/commit/2e9d78087592e7463d6bd7ac7901f8630ebc1cb1))
 
+## [0.6.0](https://github.com/MunifTanjim/express-joi-openapi/compare/0.5.2...0.6.0) (2020-08-28)
+
+
+### Bug Fixes
+
+* joiRequestValidatorPlugin value coercion ([f9fedde](https://github.com/MunifTanjim/express-joi-openapi/commit/f9feddea6aa7d806c16f9fd586a0222cd982eb5a))
+
