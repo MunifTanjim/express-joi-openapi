@@ -91,6 +91,9 @@ export const getJoiRequestValidatorPlugin = ({
         ...joiValidationOptions,
       }
 
+      const extendedValidationResult =
+        validationOptions.debug || validationOptions.warnings
+
       const requestValidationMiddleware: Handler = async (
         req,
         _res,
@@ -107,8 +110,13 @@ export const getJoiRequestValidatorPlugin = ({
 
               return schema
                 .validateAsync(req[segment], validationOptions)
-                .then(({ value }: ValidationResult) => {
-                  req[segment] = value
+                .then((result: ValidationResult) => {
+                  if (extendedValidationResult) {
+                    req[segment] = result.value
+                  } else {
+                    req[segment] = result
+                  }
+
                   return null
                 })
                 .catch((error: ValidationError) => {

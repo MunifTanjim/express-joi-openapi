@@ -166,6 +166,145 @@ describe('getJoiRequestValidatorPlugin', () => {
       })
     })
 
+    describe('value coercion', () => {
+      const mockFn = jest.fn()
+
+      beforeEach(() => {
+        const expressOpenApi = new ExpressOpenAPI()
+
+        app = express()
+        app.use(express.json())
+
+        const joiRequestValidatorPlugin = getJoiRequestValidatorPlugin()
+
+        validate = expressOpenApi.registerPlugin(joiRequestValidatorPlugin)
+
+        mockFn.mockReset()
+      })
+
+      test('coerces w/o option debug/warnings', async () => {
+        app.post(
+          '/ping',
+          validate({
+            body: Joi.object({
+              count: Joi.number().integer().required(),
+            }),
+          }),
+          (req, _res, next) => {
+            mockFn(req.body)
+            next()
+          },
+          handler
+        )
+
+        app.use(errorHandler)
+
+        const response = await request(app).post('/ping').send({ count: '42' })
+        expect(response.status).toBe(200)
+        expect(mockFn.mock.calls).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "count": 42,
+              },
+            ],
+          ]
+        `)
+      })
+
+      test('coerces w/ option debug=true', async () => {
+        app.post(
+          '/ping',
+          validate(
+            {
+              body: Joi.object({
+                count: Joi.number().integer().required(),
+              }),
+            },
+            { debug: true }
+          ),
+          (req, _res, next) => {
+            mockFn(req.body)
+            next()
+          },
+          handler
+        )
+
+        app.use(errorHandler)
+
+        const response = await request(app).post('/ping').send({ count: '42' })
+        expect(response.status).toBe(200)
+        expect(mockFn.mock.calls).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "count": 42,
+              },
+            ],
+          ]
+        `)
+      })
+
+      test('coerces w/ option warnings=true', async () => {
+        app.post(
+          '/ping',
+          validate(
+            {
+              body: Joi.object({
+                count: Joi.number().integer().required(),
+              }),
+            },
+            { warnings: true }
+          ),
+          (req, _res, next) => {
+            mockFn(req.body)
+            next()
+          },
+          handler
+        )
+
+        app.use(errorHandler)
+
+        const response = await request(app).post('/ping').send({ count: '42' })
+        expect(response.status).toBe(200)
+        expect(mockFn.mock.calls).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "count": 42,
+              },
+            ],
+          ]
+        `)
+      })
+
+      test('does not coerce w/ option convert=false', async () => {
+        app.post(
+          '/ping',
+          validate(
+            {
+              body: Joi.object({
+                count: Joi.number().integer().required(),
+              }),
+            },
+            { convert: false }
+          ),
+          (req, _res, next) => {
+            mockFn(req.body)
+            next()
+          },
+          handler
+        )
+
+        app.use(errorHandler)
+
+        const response = await request(app).post('/ping').send({ count: '42' })
+        expect(response.status).toBe(400)
+        expect(response.body).toMatchSnapshot()
+        expect(mockFn.mock.calls).toMatchInlineSnapshot(`Array []`)
+      })
+    })
+
     describe('options: segmentOrder', () => {
       test('(default) validates query before body', async () => {
         const expressOpenApi = new ExpressOpenAPI()

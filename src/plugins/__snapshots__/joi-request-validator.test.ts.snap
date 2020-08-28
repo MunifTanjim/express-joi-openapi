@@ -161,3 +161,21 @@ Object {
   },
 }
 `;
+
+exports[`getJoiRequestValidatorPlugin joiRequestValidatorPlugin value coercion does not coerce w/ option convert=false 1`] = `
+Object {
+  "error": Object {
+    "details": Array [
+      Object {
+        "message": "\\"count\\" must be a number",
+        "path": Array [
+          "count",
+        ],
+        "type": "number.base",
+      },
+    ],
+    "message": "\\"count\\" must be a number",
+    "segment": "body",
+  },
+}
+`;
