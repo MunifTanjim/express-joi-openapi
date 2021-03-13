@@ -1,4 +1,4 @@
-import { Schema } from '@hapi/joi'
+import { Schema } from 'joi'
 import { SchemaObject } from 'openapi3-ts'
 import { JoiSchema, JoiSchemaFlags, JoiSchemaRule } from './types'
 import {

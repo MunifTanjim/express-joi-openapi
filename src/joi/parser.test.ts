@@ -1,4 +1,4 @@
-import Joi from '@hapi/joi'
+import Joi from 'joi'
 import { parseJoiSchema } from './parser'
 
 describe('parseJoiSchema', () => {

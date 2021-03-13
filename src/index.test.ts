@@ -1,4 +1,4 @@
-import Joi from '@hapi/joi'
+import Joi from 'joi'
 import express from 'express'
 import request from 'supertest'
 import { ExpressOpenAPI } from './index'

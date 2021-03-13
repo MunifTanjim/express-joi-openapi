@@ -3,7 +3,7 @@ import Joi, {
   SchemaLike,
   ValidationError,
   ValidationOptions,
-} from '@hapi/joi'
+} from 'joi'
 import { Handler } from 'express'
 import { HeaderObject, HeadersObject, ResponseObject } from 'openapi3-ts'
 import { parseJoiSchema } from '../joi/parser'
