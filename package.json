@@ -51,10 +51,9 @@
     "@commitlint/cli": "^9.1.1",
     "@commitlint/config-conventional": "^9.1.1",
     "@commitlint/prompt-cli": "^9.1.1",
-    "@hapi/joi": "^17.1.1",
     "@types/express": "^4.17.7",
-    "@types/hapi__joi": "^17.1.4",
     "@types/jest": "^26.0.5",
+    "@types/joi": "^17.2.3",
     "@types/lodash": "^4.14.158",
     "@types/ramda": "^0.27.14",
     "@types/supertest": "^2.0.10",
@@ -69,6 +68,7 @@
     "express": "^4.17.1",
     "husky": "^4.2.5",
     "jest": "^26.1.0",
+    "joi": "^17.4.0",
     "lint-staged": "^10.2.11",
     "microbundle": "^0.12.3",
     "prettier": "^2.0.5",
@@ -79,7 +79,7 @@
     "typescript": "^3.9.7"
   },
   "peerDependencies": {
-    "@hapi/joi": "^17",
+    "joi": "^17",
     "express": "^4"
   }
 }

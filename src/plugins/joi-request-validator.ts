@@ -4,7 +4,7 @@ import Joi, {
   SchemaLike,
   ValidationError,
   ValidationResult,
-} from '@hapi/joi'
+} from 'joi'
 import { Handler } from 'express'
 import {
   ParameterLocation,

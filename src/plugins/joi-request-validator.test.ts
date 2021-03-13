@@ -6,7 +6,7 @@ import {
   GetJoiRequestValidatorMiddleware,
 } from './joi-request-validator'
 import request from 'supertest'
-import Joi from '@hapi/joi'
+import Joi from 'joi'
 
 describe('getJoiRequestValidatorPlugin', () => {
   test('returns plugin', () => {

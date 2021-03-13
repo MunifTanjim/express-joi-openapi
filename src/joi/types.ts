@@ -8,7 +8,7 @@ import {
   Schema,
   SchemaInternals,
   StringRegexOptions,
-} from '@hapi/joi'
+} from 'joi'
 
 type SchemaByType = ReturnType<Root['types']>
 export type JoiSchemaType = keyof SchemaByType
@@ -179,7 +179,7 @@ export type JoiSchemaFlags = {
   unknown?: boolean
 }
 
-declare module '@hapi/joi' {
+declare module 'joi' {
   interface SchemaInternals {
     _rules: any[]
     _singleRules: Map<string, any>
@@ -187,7 +187,7 @@ declare module '@hapi/joi' {
 
   interface AnySchema {
     $_terms: JoiSchemaTerms<'any'>
-    _preferences: null | import('@hapi/joi').ValidationOptions
+    _preferences: null | import('joi').ValidationOptions
     _valids: null | {
       _values: Set<any>
     }

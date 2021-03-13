@@ -3,7 +3,7 @@ import {
   Schema,
   SchemaLike,
   ValidationOptions,
-} from '@hapi/joi'
+} from 'joi'
 import { Application, Handler } from 'express'
 import { OpenAPISpecification } from './openapi'
 
