@@ -86,3 +86,5 @@
 
 * joiRequestValidatorPlugin value coercion ([f9fedde](https://github.com/MunifTanjim/express-joi-openapi/commit/f9feddea6aa7d806c16f9fd586a0222cd982eb5a))
 
+## [0.7.0](https://github.com/MunifTanjim/express-joi-openapi/compare/0.6.0...0.7.0) (2021-03-13)
+
