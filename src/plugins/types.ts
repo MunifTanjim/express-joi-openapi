@@ -1,6 +1,6 @@
 import { Handler } from 'express'
+import { Stash } from 'express-route-plugin'
 import { OpenAPISpecification } from '../openapi'
-import { Stash } from '../stash'
 import { HttpMethod } from '../types'
 
 export type ExpressOpenAPIPluginInternals<StashValue extends any> = {
@@ -10,7 +10,7 @@ export type ExpressOpenAPIPluginInternals<StashValue extends any> = {
 
 export type RouteProcessor<StashValue extends any> = (
   specification: OpenAPISpecification,
-  stash: StashValue,
+  stash: StashValue | null,
   info: {
     path: string
     method: HttpMethod

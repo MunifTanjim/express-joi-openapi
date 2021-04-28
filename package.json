@@ -43,6 +43,7 @@
     "version": "yarn run changelog"
   },
   "dependencies": {
+    "express-route-plugin": "*",
     "openapi3-ts": "^1.4.0"
   },
   "devDependencies": {

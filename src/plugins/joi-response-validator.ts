@@ -143,12 +143,30 @@ export const getJoiResponseValidatorPlugin = ({
         next()
       }
 
-      internals.stash.store(validationMiddleware, schemaMap)
+      internals.stash.set(validationMiddleware, schemaMap)
 
       return validationMiddleware
     },
 
     processRoute: (specification, schemaMap, { path, method }): void => {
+      if (!specification.getPathItem(path)) {
+        specification.setPathItem(path, {})
+      }
+
+      if (!specification.getPathItemOperation(path, method)) {
+        specification.setPathItemOperation(path, method, {
+          responses: {
+            default: {
+              description: '',
+            },
+          },
+        })
+      }
+
+      if (!schemaMap) {
+        return
+      }
+
       for (const [key, schemaBySegment] of schemaMap.entries()) {
         if (!schemaBySegment) {
           continue

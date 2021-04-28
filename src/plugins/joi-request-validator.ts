@@ -74,7 +74,7 @@ export const getJoiRequestValidatorPlugin = ({
     name: 'joi-request-validator',
 
     getMiddleware: (
-      internals,
+      store,
       joiRequestSchema,
       joiValidationOptions = {}
     ): Handler => {
@@ -131,12 +131,30 @@ export const getJoiRequestValidatorPlugin = ({
         }
       }
 
-      internals.stash.store(requestValidationMiddleware, schemaMap)
+      store.stash.set(requestValidationMiddleware, schemaMap)
 
       return requestValidationMiddleware
     },
 
     processRoute: (specification, schemaMap, { path, method }): void => {
+      if (!specification.getPathItem(path)) {
+        specification.setPathItem(path, {})
+      }
+
+      if (!specification.getPathItemOperation(path, method)) {
+        specification.setPathItemOperation(path, method, {
+          responses: {
+            default: {
+              description: '',
+            },
+          },
+        })
+      }
+
+      if (!schemaMap) {
+        return
+      }
+
       for (const [segment, schema] of schemaMap.entries()) {
         if (!schema) {
           continue

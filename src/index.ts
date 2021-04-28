@@ -1,20 +1,15 @@
 import { Application, Handler, Router } from 'express'
-import { OpenAPISpecification, processExpressRouters } from './openapi'
-import {
-  ExpressOpenAPIPlugin,
-  ExpressOpenAPIPluginInternals,
-  RegisteredExpressOpenAPIPlugin,
-} from './plugins'
-import { Stash } from './stash'
+import { PluginProcessor } from 'express-route-plugin'
+import { OpenAPISpecification } from './openapi'
+import { ExpressOpenAPIPlugin } from './plugins'
 
 export * from './joi'
-export * from './plugins'
 export { OpenAPISpecification } from './openapi'
+export * from './plugins'
 
 export class ExpressOpenAPI {
-  private plugins: RegisteredExpressOpenAPIPlugin[] = []
-  private useStringStashKey: boolean
   private specification: OpenAPISpecification
+  private processor: PluginProcessor<OpenAPISpecification>
 
   constructor({
     specification = new OpenAPISpecification(),
@@ -29,7 +24,10 @@ export class ExpressOpenAPI {
     useStringStashKey?: boolean
   } = {}) {
     this.specification = specification
-    this.useStringStashKey = useStringStashKey
+    this.processor = new PluginProcessor<OpenAPISpecification>({
+      state: this.specification,
+      useStringStashKey,
+    })
   }
 
   registerPlugin = <
@@ -38,41 +36,28 @@ export class ExpressOpenAPI {
   >(
     plugin: ExpressOpenAPIPlugin<StashType, GetMiddleware>
   ): ((...params: Parameters<GetMiddleware>) => ReturnType<GetMiddleware>) => {
-    const stashSymbol = Symbol(plugin.name)
-
-    const stashKey = this.useStringStashKey
-      ? stashSymbol.toString()
-      : stashSymbol
-
-    const internals: ExpressOpenAPIPluginInternals<StashType> = {
-      specification: this.specification,
-      stash: new Stash<StashType>(stashKey),
-    }
-
-    const getMiddleware = (
-      ...params: Parameters<GetMiddleware>
-    ): ReturnType<GetMiddleware> => {
-      return plugin.getMiddleware(internals, ...params)
-    }
-
-    const registeredPlugin: RegisteredExpressOpenAPIPlugin = {
-      name: plugin.name,
-      specification: internals.specification,
-      stash: internals.stash,
-      processRoute: plugin.processRoute,
-    }
-
-    this.plugins.push(registeredPlugin)
-
-    return getMiddleware
+    return this.processor.registerPlugin<StashType, GetMiddleware>({
+      id: plugin.name,
+      state: this.specification,
+      getMiddleware: (store, ...params) => {
+        return plugin.getMiddleware(
+          {
+            specification: store.state,
+            stash: store.stash,
+          },
+          ...params
+        )
+      },
+      processRoute: (store, info) => {
+        return plugin.processRoute(store.state, store.stash, info)
+      },
+    })
   }
 
   populateSpecification = (
     app: Application | Router,
     basePath?: string
   ): OpenAPISpecification => {
-    processExpressRouters(this.specification, app, basePath, this.plugins)
-
-    return this.specification
+    return this.processor.process(app, basePath)
   }
 }
